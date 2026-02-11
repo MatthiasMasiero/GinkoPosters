@@ -10,11 +10,12 @@ export function StorefrontHeader() {
   const { itemCount } = useCart();
 
   const accentColor = artist?.primary_color || "#18181b";
+  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
 
   return (
     <header className="flex items-center justify-between border-b px-6 py-5 md:px-12">
       <Link
-        href="/storefront"
+        href={`/storefront${artistParam}`}
         className="text-lg font-medium tracking-tight"
         style={{ color: accentColor }}
       >
@@ -23,13 +24,19 @@ export function StorefrontHeader() {
 
       <nav className="flex items-center gap-6">
         <Link
-          href="/storefront"
+          href="/"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          GinkoPosters
+        </Link>
+        <Link
+          href={`/storefront${artistParam}`}
           className="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           Home
         </Link>
         <Link
-          href="/storefront/cart"
+          href={`/storefront/cart${artistParam}`}
           className="relative text-muted-foreground transition-colors hover:text-foreground"
         >
           <ShoppingBag className="h-5 w-5" />

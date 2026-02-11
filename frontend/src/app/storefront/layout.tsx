@@ -20,7 +20,16 @@ function StorefrontContent({ children }: { children: React.ReactNode }) {
         // In dev mode, check for artist query param
         const artistSlug = searchParams.get("artist");
         if (artistSlug) {
+          sessionStorage.setItem("artist_slug", artistSlug);
           const a = await api.artists.getBySlug(artistSlug);
+          setArtist(a);
+          return;
+        }
+
+        // Fallback: check sessionStorage for previously loaded artist slug
+        const storedSlug = sessionStorage.getItem("artist_slug");
+        if (storedSlug) {
+          const a = await api.artists.getBySlug(storedSlug);
           setArtist(a);
           return;
         }

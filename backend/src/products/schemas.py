@@ -64,6 +64,7 @@ class ProductPublicResponse(BaseModel):
     slug: str
     description: str | None
     image_url: str | None
+    is_active: bool
     variants: list[VariantResponse] = []
 
     model_config = {"from_attributes": True}

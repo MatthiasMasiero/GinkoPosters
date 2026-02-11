@@ -15,11 +15,9 @@ export function SizeSelector({
   selectedId,
   onSelect,
 }: SizeSelectorProps) {
-  const activeVariants = variants.filter((v) => v.is_active);
-
   return (
     <div className="flex flex-wrap gap-3">
-      {activeVariants.map((variant) => (
+      {variants.map((variant) => (
         <button
           key={variant.id}
           type="button"

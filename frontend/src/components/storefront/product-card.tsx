@@ -1,19 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+import { useArtist } from "@/hooks/use-artist";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { artist } = useArtist();
   const minPrice = product.variants.length
-    ? Math.min(...product.variants.filter((v) => v.is_active).map((v) => v.price))
+    ? Math.min(...product.variants.map((v) => v.price))
     : 0;
+
+  const href = artist?.slug
+    ? `/storefront/products/${product.id}?artist=${artist.slug}`
+    : `/storefront/products/${product.id}`;
 
   return (
     <Link
-      href={`/storefront/products/${product.id}`}
+      href={href}
       className="group block"
     >
       {/* Image placeholder - 3:4 aspect ratio for posters */}

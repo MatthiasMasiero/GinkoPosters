@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Minus, Plus } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useCart } from "@/hooks/use-cart";
+import { useArtist } from "@/hooks/use-artist";
 import { SizeSelector } from "@/components/storefront/size-selector";
 import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
@@ -14,6 +15,7 @@ import { formatCurrency } from "@/lib/utils";
 export default function ProductDetailPage() {
   const params = useParams();
   const { addItem } = useCart();
+  const { artist } = useArtist();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     null
@@ -22,15 +24,18 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
 
+  const backHref = artist?.slug
+    ? `/storefront?artist=${artist.slug}`
+    : "/storefront";
+
   useEffect(() => {
     const id = params.id as string;
     api.products
       .get(id)
       .then((p) => {
         setProduct(p);
-        const activeVariants = p.variants.filter((v) => v.is_active);
-        if (activeVariants.length > 0) {
-          setSelectedVariant(activeVariants[0]);
+        if (p.variants.length > 0) {
+          setSelectedVariant(p.variants[0]);
         }
       })
       .catch(() => setProduct(null))
@@ -57,7 +62,7 @@ export default function ProductDetailPage() {
       <div className="px-6 py-24 text-center md:px-12">
         <p className="text-muted-foreground">Product not found.</p>
         <Link
-          href="/storefront"
+          href={backHref}
           className="mt-4 inline-flex items-center text-sm text-foreground underline"
         >
           Back to store
@@ -70,7 +75,7 @@ export default function ProductDetailPage() {
     <div className="px-6 py-12 md:px-12">
       <div className="mx-auto max-w-5xl">
         <Link
-          href="/storefront"
+          href={backHref}
           className="mb-8 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

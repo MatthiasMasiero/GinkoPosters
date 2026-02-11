@@ -47,5 +47,6 @@ class ArtistPublicResponse(BaseModel):
     secondary_color: str
     bio: str | None
     logo_url: str | None
+    is_active: bool
 
     model_config = {"from_attributes": True}
