@@ -1,0 +1,53 @@
+import stripe
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.config import settings
+from src.dependencies import get_db
+from src.payments.schemas import CheckoutSessionRequest, CheckoutSessionResponse
+from src.payments.service import (
+    create_checkout_session,
+    handle_charge_refunded,
+    handle_checkout_completed,
+)
+
+router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
+
+
+@router.post("/create-checkout-session", response_model=CheckoutSessionResponse)
+async def create_checkout(
+    body: CheckoutSessionRequest, db: AsyncSession = Depends(get_db)
+):
+    try:
+        session = await create_checkout_session(db, body.order_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return CheckoutSessionResponse(checkout_url=session.url, session_id=session.id)
+
+
+@router.post("/webhook")
+async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload"
+        )
+    except stripe.error.SignatureVerificationError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature"
+        )
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        await handle_checkout_completed(db, session["id"])
+    elif event["type"] == "charge.refunded":
+        charge = event["data"]["object"]
+        await handle_charge_refunded(db, charge["payment_intent"])
+
+    return {"status": "ok"}
