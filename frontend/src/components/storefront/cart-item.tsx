@@ -38,8 +38,7 @@ export function CartItemRow({
       <div className="flex-1">
         <h3 className="text-sm font-medium">{item.product.title}</h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          {item.variant.size_label} &mdash; {item.variant.width_cm} x{" "}
-          {item.variant.height_cm} cm
+          {item.variant.size}
         </p>
 
         <div className="mt-3 flex items-center gap-2">

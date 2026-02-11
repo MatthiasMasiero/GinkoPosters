@@ -31,10 +31,7 @@ export function SizeSelector({
               : "border-border hover:border-foreground/50"
           )}
         >
-          <span className="text-sm font-medium">{variant.size_label}</span>
-          <span className="mt-0.5 text-xs opacity-70">
-            {variant.width_cm} x {variant.height_cm} cm
-          </span>
+          <span className="text-sm font-medium">{variant.size}</span>
           <span className="mt-1 text-sm font-medium">
             {formatCurrency(variant.price)}
           </span>

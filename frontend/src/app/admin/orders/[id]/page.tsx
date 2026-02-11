@@ -156,8 +156,7 @@ export default function AdminOrderDetailPage() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Product</TableHead>
-            <TableHead>Size</TableHead>
+            <TableHead>Variant</TableHead>
             <TableHead>Qty</TableHead>
             <TableHead>Unit Price</TableHead>
             <TableHead>Total</TableHead>
@@ -166,11 +165,10 @@ export default function AdminOrderDetailPage() {
         <TableBody>
           {order.items.map((item) => (
             <TableRow key={item.id}>
-              <TableCell>{item.product_title}</TableCell>
-              <TableCell>{item.variant_label}</TableCell>
+              <TableCell>{item.variant_id}</TableCell>
               <TableCell>{item.quantity}</TableCell>
               <TableCell>{formatCurrency(item.unit_price)}</TableCell>
-              <TableCell>{formatCurrency(item.total_price)}</TableCell>
+              <TableCell>{formatCurrency(item.unit_price * item.quantity)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -185,14 +183,10 @@ export default function AdminOrderDetailPage() {
             <span className="text-muted-foreground">Subtotal</span>
             <span>{formatCurrency(order.subtotal)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Shipping</span>
-            <span>{formatCurrency(order.shipping_cost)}</span>
-          </div>
           <Separator />
           <div className="flex justify-between font-medium">
             <span>Total</span>
-            <span>{formatCurrency(order.total)}</span>
+            <span>{formatCurrency(order.subtotal)}</span>
           </div>
         </div>
       </div>

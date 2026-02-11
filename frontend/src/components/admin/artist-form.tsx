@@ -31,10 +31,9 @@ export function ArtistForm({ artist }: ArtistFormProps) {
       slug: formData.get("slug") as string,
       domain: formData.get("domain") as string,
       bio: (formData.get("bio") as string) || null,
-      brand_primary_color: (formData.get("brand_primary_color") as string) || null,
-      brand_secondary_color: (formData.get("brand_secondary_color") as string) || null,
+      primary_color: (formData.get("primary_color") as string) || "#000000",
+      secondary_color: (formData.get("secondary_color") as string) || "#FFFFFF",
       logo_url: (formData.get("logo_url") as string) || null,
-      commission_rate: parseFloat(formData.get("commission_rate") as string) || 0.2,
       is_active: formData.get("is_active") === "on",
     };
 
@@ -83,22 +82,22 @@ export function ArtistForm({ artist }: ArtistFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="brand_primary_color">Primary Color</Label>
+          <Label htmlFor="primary_color">Primary Color</Label>
           <Input
-            id="brand_primary_color"
-            name="brand_primary_color"
+            id="primary_color"
+            name="primary_color"
             type="color"
-            defaultValue={artist?.brand_primary_color || "#18181b"}
+            defaultValue={artist?.primary_color || "#18181b"}
             className="mt-1 h-10"
           />
         </div>
         <div>
-          <Label htmlFor="brand_secondary_color">Secondary Color</Label>
+          <Label htmlFor="secondary_color">Secondary Color</Label>
           <Input
-            id="brand_secondary_color"
-            name="brand_secondary_color"
+            id="secondary_color"
+            name="secondary_color"
             type="color"
-            defaultValue={artist?.brand_secondary_color || "#a1a1aa"}
+            defaultValue={artist?.secondary_color || "#a1a1aa"}
             className="mt-1 h-10"
           />
         </div>
@@ -111,20 +110,6 @@ export function ArtistForm({ artist }: ArtistFormProps) {
           name="logo_url"
           defaultValue={artist?.logo_url || ""}
           placeholder="https://..."
-          className="mt-1"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="commission_rate">Commission Rate</Label>
-        <Input
-          id="commission_rate"
-          name="commission_rate"
-          type="number"
-          step="0.01"
-          min="0"
-          max="1"
-          defaultValue={artist?.commission_rate ?? 0.2}
           className="mt-1"
         />
       </div>

@@ -47,7 +47,7 @@ export default function AdminArtistsPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Domain</TableHead>
-                <TableHead>Commission</TableHead>
+                <TableHead>Color</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -76,7 +76,10 @@ export default function AdminArtistsPage() {
                       {artist.domain}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {(artist.commission_rate * 100).toFixed(0)}%
+                      <div
+                        className="inline-block h-4 w-4 rounded-full border"
+                        style={{ backgroundColor: artist.primary_color }}
+                      />
                     </TableCell>
                     <TableCell>
                       <Badge

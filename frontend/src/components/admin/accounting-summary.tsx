@@ -70,7 +70,7 @@ export function AccountingSummaryView({ summary }: AccountingSummaryProps) {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">
-              {formatCurrency(summary.total_platform_profit)}
+              {formatCurrency(summary.total_net_profit)}
             </p>
           </CardContent>
         </Card>
@@ -90,8 +90,7 @@ export function AccountingSummaryView({ summary }: AccountingSummaryProps) {
                 <TableHead>Revenue</TableHead>
                 <TableHead>COGS</TableHead>
                 <TableHead>Fees</TableHead>
-                <TableHead>Artist Payout</TableHead>
-                <TableHead>Profit</TableHead>
+                <TableHead>Net Profit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -104,8 +103,7 @@ export function AccountingSummaryView({ summary }: AccountingSummaryProps) {
                   <TableCell>{formatCurrency(row.revenue)}</TableCell>
                   <TableCell>{formatCurrency(row.cogs)}</TableCell>
                   <TableCell>{formatCurrency(row.stripe_fees)}</TableCell>
-                  <TableCell>{formatCurrency(row.artist_payout)}</TableCell>
-                  <TableCell>{formatCurrency(row.platform_profit)}</TableCell>
+                  <TableCell>{formatCurrency(row.net_profit)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

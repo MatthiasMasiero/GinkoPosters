@@ -9,7 +9,7 @@ export function StorefrontHeader() {
   const { artist } = useArtist();
   const { itemCount } = useCart();
 
-  const accentColor = artist?.brand_primary_color || "#18181b";
+  const accentColor = artist?.primary_color || "#18181b";
 
   return (
     <header className="flex items-center justify-between border-b px-6 py-5 md:px-12">

@@ -19,6 +19,11 @@ async def get_artist_by_domain(db: AsyncSession, domain: str) -> Artist | None:
     return result.scalar_one_or_none()
 
 
+async def get_artist_by_slug(db: AsyncSession, slug: str) -> Artist | None:
+    result = await db.execute(select(Artist).where(Artist.slug == slug))
+    return result.scalar_one_or_none()
+
+
 async def list_all_artists(db: AsyncSession) -> list[Artist]:
     result = await db.execute(select(Artist).order_by(Artist.name))
     return list(result.scalars().all())

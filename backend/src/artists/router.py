@@ -12,6 +12,7 @@ from src.artists.schemas import (
 from src.artists.service import (
     create_artist,
     get_artist_by_domain,
+    get_artist_by_slug,
     list_active_artists,
     list_all_artists,
     update_artist,
@@ -31,6 +32,14 @@ async def get_active_artists(db: AsyncSession = Depends(get_db)):
 @router.get("/api/v1/artists/by-domain/{domain}", response_model=ArtistPublicResponse)
 async def get_artist_by_domain_name(domain: str, db: AsyncSession = Depends(get_db)):
     artist = await get_artist_by_domain(db, domain)
+    if artist is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artist not found")
+    return artist
+
+
+@router.get("/api/v1/artists/by-slug/{slug}", response_model=ArtistPublicResponse)
+async def get_artist_by_slug_name(slug: str, db: AsyncSession = Depends(get_db)):
+    artist = await get_artist_by_slug(db, slug)
     if artist is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artist not found")
     return artist

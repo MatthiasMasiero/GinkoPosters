@@ -5,8 +5,8 @@ interface ArtistStoreCardProps {
 }
 
 export function ArtistStoreCard({ artist }: ArtistStoreCardProps) {
-  const primaryColor = artist.brand_primary_color || "#18181b";
-  const secondaryColor = artist.brand_secondary_color || "#a1a1aa";
+  const primaryColor = artist.primary_color || "#18181b";
+  const secondaryColor = artist.secondary_color || "#a1a1aa";
 
   // In dev, use query param fallback; in production, use the artist's domain
   const storeUrl =
