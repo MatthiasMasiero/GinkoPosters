@@ -6,6 +6,14 @@ from src.config import settings
 ADMIN_PREVIEW_EXPIRY = 3600  # 1 hour
 FULFILLMENT_EXPIRY = 604800  # 7 days
 
+ALLOWED_UPLOAD_CONTENT_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+]
+MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+
 
 def _get_s3_client():
     return boto3.client(
@@ -17,11 +25,18 @@ def _get_s3_client():
     )
 
 
-def generate_upload_url(key: str) -> str:
+def generate_upload_url(key: str, content_type: str = "application/pdf") -> str:
+    if content_type not in ALLOWED_UPLOAD_CONTENT_TYPES:
+        raise ValueError(f"Content type not allowed: {content_type}")
     client = _get_s3_client()
     return client.generate_presigned_url(
         "put_object",
-        Params={"Bucket": settings.S3_BUCKET_NAME, "Key": key},
+        Params={
+            "Bucket": settings.S3_BUCKET_NAME,
+            "Key": key,
+            "ContentType": content_type,
+            "ContentLength": MAX_UPLOAD_SIZE,
+        },
         ExpiresIn=ADMIN_PREVIEW_EXPIRY,
     )
 

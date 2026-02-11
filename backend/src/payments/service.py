@@ -54,6 +54,10 @@ async def handle_checkout_completed(db: AsyncSession, session_id: str) -> None:
     if order is None:
         return
 
+    # Idempotency: skip if already processed
+    if order.status != "pending_payment":
+        return
+
     order.status = "paid"
 
     # Retrieve the payment intent for the actual Stripe fee

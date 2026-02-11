@@ -1,17 +1,17 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ArtistBase(BaseModel):
-    name: str
-    slug: str
-    domain: str
-    primary_color: str = "#000000"
-    secondary_color: str = "#FFFFFF"
-    bio: str | None = None
-    logo_url: str | None = None
+    name: str = Field(..., min_length=1, max_length=255)
+    slug: str = Field(..., min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
+    domain: str = Field(..., min_length=1, max_length=255)
+    primary_color: str = Field(default="#000000", max_length=7, pattern=r"^#[0-9a-fA-F]{6}$")
+    secondary_color: str = Field(default="#FFFFFF", max_length=7, pattern=r"^#[0-9a-fA-F]{6}$")
+    bio: str | None = Field(default=None, max_length=2000)
+    logo_url: str | None = Field(default=None, max_length=500)
 
 
 class ArtistCreate(ArtistBase):
@@ -19,13 +19,13 @@ class ArtistCreate(ArtistBase):
 
 
 class ArtistUpdate(BaseModel):
-    name: str | None = None
-    slug: str | None = None
-    domain: str | None = None
-    primary_color: str | None = None
-    secondary_color: str | None = None
-    bio: str | None = None
-    logo_url: str | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    slug: str | None = Field(default=None, min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
+    domain: str | None = Field(default=None, min_length=1, max_length=255)
+    primary_color: str | None = Field(default=None, max_length=7, pattern=r"^#[0-9a-fA-F]{6}$")
+    secondary_color: str | None = Field(default=None, max_length=7, pattern=r"^#[0-9a-fA-F]{6}$")
+    bio: str | None = Field(default=None, max_length=2000)
+    logo_url: str | None = Field(default=None, max_length=500)
     is_active: bool | None = None
 
 

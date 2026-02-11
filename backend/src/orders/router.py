@@ -1,6 +1,8 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import require_admin
@@ -19,6 +21,7 @@ from src.orders.service import (
 )
 
 router = APIRouter(tags=["orders"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 # Public endpoints
@@ -27,7 +30,8 @@ router = APIRouter(tags=["orders"])
     response_model=OrderResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_new_order(body: OrderCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def create_new_order(request: Request, body: OrderCreate, db: AsyncSession = Depends(get_db)):
     try:
         order = await create_order(db, body)
     except ValueError as e:

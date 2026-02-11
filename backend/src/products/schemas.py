@@ -1,14 +1,14 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class VariantBase(BaseModel):
-    size: str
-    sku: str
-    price: float
-    cost_price: float
+    size: str = Field(..., min_length=1, max_length=10)
+    sku: str = Field(..., min_length=1, max_length=50)
+    price: float = Field(..., gt=0, le=99999)
+    cost_price: float = Field(..., gt=0, le=99999)
 
 
 class VariantCreate(VariantBase):
@@ -25,24 +25,24 @@ class VariantResponse(VariantBase):
 
 
 class ProductBase(BaseModel):
-    title: str
-    slug: str
-    description: str | None = None
-    image_url: str | None = None
-    print_file_key: str | None = None
+    title: str = Field(..., min_length=1, max_length=255)
+    slug: str = Field(..., min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
+    description: str | None = Field(default=None, max_length=5000)
+    image_url: str | None = Field(default=None, max_length=500)
+    print_file_key: str | None = Field(default=None, max_length=500)
 
 
 class ProductCreate(ProductBase):
     artist_id: uuid.UUID
-    variants: list[VariantCreate] = []
+    variants: list[VariantCreate] = Field(default=[], max_length=20)
 
 
 class ProductUpdate(BaseModel):
-    title: str | None = None
-    slug: str | None = None
-    description: str | None = None
-    image_url: str | None = None
-    print_file_key: str | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    slug: str | None = Field(default=None, min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
+    description: str | None = Field(default=None, max_length=5000)
+    image_url: str | None = Field(default=None, max_length=500)
+    print_file_key: str | None = Field(default=None, max_length=500)
     is_active: bool | None = None
 
 

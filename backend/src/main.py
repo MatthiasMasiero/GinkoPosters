@@ -64,10 +64,19 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# Dynamic CORS middleware
+# Security headers + dynamic CORS middleware
 @app.middleware("http")
-async def dynamic_cors_middleware(request: Request, call_next):
+async def security_middleware(request: Request, call_next):
     response: Response = await call_next(request)
+
+    # Security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
+    # Dynamic CORS
     origin = request.headers.get("origin")
     allowed = getattr(request.app.state, "allowed_origins", ["http://localhost:3000"])
     if origin and origin in allowed:

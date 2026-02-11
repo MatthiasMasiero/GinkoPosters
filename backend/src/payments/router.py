@@ -1,5 +1,7 @@
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
@@ -12,11 +14,13 @@ from src.payments.service import (
 )
 
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/create-checkout-session", response_model=CheckoutSessionResponse)
+@limiter.limit("10/minute")
 async def create_checkout(
-    body: CheckoutSessionRequest, db: AsyncSession = Depends(get_db)
+    request: Request, body: CheckoutSessionRequest, db: AsyncSession = Depends(get_db)
 ):
     try:
         session = await create_checkout_session(db, body.order_id)
