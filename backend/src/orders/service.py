@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.orders.models import Order, OrderItem
-from src.orders.schemas import OrderCreate
-from src.products.models import ProductVariant
+from src.orders.schemas import VALID_ORDER_STATUSES, OrderCreate
+from src.products.models import Product, ProductVariant
 
 
 def _generate_order_number() -> str:
@@ -17,10 +17,12 @@ def _generate_order_number() -> str:
 
 
 async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
-    # Look up variant prices
+    # Look up variant prices with product join for artist validation
     variant_ids = [item.variant_id for item in data.items]
     result = await db.execute(
-        select(ProductVariant).where(ProductVariant.id.in_(variant_ids))
+        select(ProductVariant)
+        .join(Product, ProductVariant.product_id == Product.id)
+        .where(ProductVariant.id.in_(variant_ids))
     )
     variants_by_id = {v.id: v for v in result.scalars().all()}
 
@@ -29,7 +31,17 @@ async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
     for item in data.items:
         variant = variants_by_id.get(item.variant_id)
         if variant is None:
-            raise ValueError(f"Variant {item.variant_id} not found")
+            raise ValueError("One or more selected variants not found")
+
+        # Verify variant belongs to the specified artist via its product
+        product_result = await db.execute(
+            select(Product).where(
+                Product.id == variant.product_id,
+                Product.artist_id == data.artist_id,
+            )
+        )
+        if product_result.scalar_one_or_none() is None:
+            raise ValueError("Variant does not belong to the specified artist")
         line_total = float(variant.price) * item.quantity
         subtotal += line_total
         order_items.append(
@@ -63,8 +75,8 @@ async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
         db.add(oi)
 
     await db.flush()
-    await db.refresh(order)
-    return order
+    # Reload with eager-loaded items to avoid MissingGreenlet in async context
+    return await get_order_by_id(db, order.id)  # type: ignore[return-value]
 
 
 async def get_order_by_id(db: AsyncSession, order_id: uuid.UUID) -> Order | None:
@@ -83,19 +95,27 @@ async def list_orders(
     db: AsyncSession,
     artist_id: uuid.UUID | None = None,
     status: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
 ) -> list[Order]:
     query = select(Order).options(selectinload(Order.items)).order_by(Order.created_at.desc())
     if artist_id is not None:
         query = query.where(Order.artist_id == artist_id)
     if status is not None:
         query = query.where(Order.status == status)
+    query = query.limit(limit).offset(offset)
     result = await db.execute(query)
     return list(result.scalars().all())
+
+
+_VALID_STATUSES = set(VALID_ORDER_STATUSES.__args__)
 
 
 async def update_order_status(
     db: AsyncSession, order_id: uuid.UUID, new_status: str, notes: str | None = None
 ) -> Order | None:
+    if new_status not in _VALID_STATUSES:
+        raise ValueError(f"Invalid order status: {new_status}")
     order = await get_order_by_id(db, order_id)
     if order is None:
         return None
@@ -103,8 +123,8 @@ async def update_order_status(
     if notes is not None:
         order.notes = notes
     await db.flush()
-    await db.refresh(order)
-    return order
+    # Reload with eager-loaded items to avoid MissingGreenlet in async context
+    return await get_order_by_id(db, order_id)  # type: ignore[return-value]
 
 
 async def get_order_by_stripe_session(

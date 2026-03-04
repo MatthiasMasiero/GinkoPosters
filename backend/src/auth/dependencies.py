@@ -5,7 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User
-from src.auth.service import decode_access_token, get_user_by_id
+from src.auth.service import decode_access_token, get_user_by_id, is_token_blacklisted
 from src.dependencies import get_db
 
 security = HTTPBearer()
@@ -27,6 +27,15 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",
         )
+
+    # Check token blacklist
+    jti = payload.get("jti")
+    if jti and await is_token_blacklisted(db, jti):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+        )
+
     user = await get_user_by_id(db, uuid.UUID(user_id))
     if user is None:
         raise HTTPException(

@@ -85,11 +85,14 @@ async def handle_checkout_completed(db: AsyncSession, session_id: str) -> None:
 
 async def handle_charge_refunded(db: AsyncSession, payment_intent_id: str) -> None:
     from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
 
     from src.orders.models import Order
 
     result = await db.execute(
-        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
+        select(Order)
+        .options(selectinload(Order.items))
+        .where(Order.stripe_payment_intent_id == payment_intent_id)
     )
     order = result.scalar_one_or_none()
     if order is None:

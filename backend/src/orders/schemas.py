@@ -23,12 +23,43 @@ class OrderCreate(BaseModel):
     items: list[OrderItemCreate] = Field(..., min_length=1, max_length=50)
 
 
+class OrderItemPublicResponse(BaseModel):
+    id: uuid.UUID
+    variant_id: uuid.UUID
+    quantity: int
+    unit_price: float
+
+    model_config = {"from_attributes": True}
+
+
 class OrderItemResponse(BaseModel):
     id: uuid.UUID
     variant_id: uuid.UUID
     quantity: int
     unit_price: float
     cost_price: float
+
+    model_config = {"from_attributes": True}
+
+
+class OrderPublicResponse(BaseModel):
+    id: uuid.UUID
+    order_number: str
+    artist_id: uuid.UUID
+    status: str
+    customer_email: str
+    customer_name: str
+    shipping_address_line1: str
+    shipping_address_line2: str | None
+    shipping_city: str
+    shipping_state: str | None
+    shipping_postal_code: str
+    shipping_country: str
+    subtotal: float
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    items: list[OrderItemPublicResponse] = []
 
     model_config = {"from_attributes": True}
 

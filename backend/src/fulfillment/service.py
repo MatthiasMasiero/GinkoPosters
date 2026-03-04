@@ -9,6 +9,15 @@ from sqlalchemy.orm import selectinload
 from src.orders.models import Order
 from src.products.models import ProductVariant
 
+_CSV_INJECTION_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _sanitize_csv_value(value: str) -> str:
+    """Prevent CSV injection by quoting values that start with dangerous characters."""
+    if value and value[0] in _CSV_INJECTION_PREFIXES:
+        return "'" + value
+    return value
+
 
 async def export_orders_csv(db: AsyncSession, order_ids: list[uuid.UUID]) -> str:
     result = await db.execute(
@@ -54,14 +63,14 @@ async def export_orders_csv(db: AsyncSession, order_ids: list[uuid.UUID]) -> str
                 order.order_number,
                 sku,
                 item.quantity,
-                order.customer_name,
-                order.shipping_address_line1,
-                order.shipping_address_line2 or "",
-                order.shipping_city,
-                order.shipping_state or "",
-                order.shipping_postal_code,
+                _sanitize_csv_value(order.customer_name),
+                _sanitize_csv_value(order.shipping_address_line1),
+                _sanitize_csv_value(order.shipping_address_line2 or ""),
+                _sanitize_csv_value(order.shipping_city),
+                _sanitize_csv_value(order.shipping_state or ""),
+                _sanitize_csv_value(order.shipping_postal_code),
                 order.shipping_country,
-                order.customer_email,
+                _sanitize_csv_value(order.customer_email),
             ])
 
     return output.getvalue()

@@ -24,6 +24,15 @@ class VariantResponse(VariantBase):
     model_config = {"from_attributes": True}
 
 
+class VariantPublicResponse(BaseModel):
+    id: uuid.UUID
+    product_id: uuid.UUID
+    size: str
+    price: float
+
+    model_config = {"from_attributes": True}
+
+
 class ProductBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     slug: str = Field(..., min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
@@ -65,6 +74,6 @@ class ProductPublicResponse(BaseModel):
     description: str | None
     image_url: str | None
     is_active: bool
-    variants: list[VariantResponse] = []
+    variants: list[VariantPublicResponse] = []
 
     model_config = {"from_attributes": True}

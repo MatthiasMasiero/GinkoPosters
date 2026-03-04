@@ -25,6 +25,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Validate configuration
+    settings.validate_secrets()
+
     # Verify DB connection on startup
     try:
         async with engine.begin() as conn:
@@ -64,6 +67,23 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+MAX_BODY_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+# Audit logging middleware (runs after security_middleware)
+@app.middleware("http")
+async def audit_log(request: Request, call_next):
+    response = await call_next(request)
+    if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+        logger.info(
+            "AUDIT: %s %s -> %d",
+            request.method,
+            request.url.path,
+            response.status_code,
+        )
+    return response
+
+
 # Security headers + dynamic CORS middleware
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
@@ -75,6 +95,8 @@ async def security_middleware(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
 
     # Dynamic CORS
     origin = request.headers.get("origin")
@@ -87,13 +109,22 @@ async def security_middleware(request: Request, call_next):
     return response
 
 
+# Request body size limit (runs before security_middleware)
+@app.middleware("http")
+async def limit_request_body(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_BODY_SIZE:
+        return Response(content="Request body too large", status_code=413)
+    return await call_next(request)
+
+
 # Also add standard CORS middleware as fallback for preflight requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Include routers

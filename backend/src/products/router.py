@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import require_admin
 from src.dependencies import get_db
+from src.pagination import pagination_params
 from src.products.schemas import (
     ProductCreate,
     ProductPublicResponse,
@@ -28,9 +29,12 @@ router = APIRouter(tags=["products"])
     response_model=list[ProductPublicResponse],
 )
 async def get_artist_products(
-    artist_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+    artist_id: uuid.UUID,
+    pagination: tuple[int, int] = Depends(pagination_params),
+    db: AsyncSession = Depends(get_db),
 ):
-    return await list_products_by_artist(db, artist_id)
+    limit, offset = pagination
+    return await list_products_by_artist(db, artist_id, limit=limit, offset=offset)
 
 
 @router.get("/api/v1/products/{product_id}", response_model=ProductPublicResponse)
@@ -44,10 +48,12 @@ async def get_product(product_id: uuid.UUID, db: AsyncSession = Depends(get_db))
 # Admin endpoints
 @router.get("/api/v1/admin/products", response_model=list[ProductResponse])
 async def admin_list_products(
+    pagination: tuple[int, int] = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    return await list_all_products(db)
+    limit, offset = pagination
+    return await list_all_products(db, limit=limit, offset=offset)
 
 
 @router.post(

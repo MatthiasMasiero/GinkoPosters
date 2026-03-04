@@ -7,9 +7,15 @@ from src.artists.models import Artist
 from src.artists.schemas import ArtistCreate, ArtistUpdate
 
 
-async def list_active_artists(db: AsyncSession) -> list[Artist]:
+async def list_active_artists(
+    db: AsyncSession, limit: int = 50, offset: int = 0
+) -> list[Artist]:
     result = await db.execute(
-        select(Artist).where(Artist.is_active.is_(True)).order_by(Artist.name)
+        select(Artist)
+        .where(Artist.is_active.is_(True))
+        .order_by(Artist.name)
+        .limit(limit)
+        .offset(offset)
     )
     return list(result.scalars().all())
 
@@ -24,8 +30,12 @@ async def get_artist_by_slug(db: AsyncSession, slug: str) -> Artist | None:
     return result.scalar_one_or_none()
 
 
-async def list_all_artists(db: AsyncSession) -> list[Artist]:
-    result = await db.execute(select(Artist).order_by(Artist.name))
+async def list_all_artists(
+    db: AsyncSession, limit: int = 50, offset: int = 0
+) -> list[Artist]:
+    result = await db.execute(
+        select(Artist).order_by(Artist.name).limit(limit).offset(offset)
+    )
     return list(result.scalars().all())
 
 

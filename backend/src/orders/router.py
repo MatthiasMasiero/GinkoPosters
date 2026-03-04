@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import require_admin
 from src.dependencies import get_db
+from src.pagination import pagination_params
 from src.orders.schemas import (
     OrderCreate,
+    OrderPublicResponse,
     OrderResponse,
     OrderStatusResponse,
     OrderStatusUpdate,
@@ -27,7 +29,7 @@ limiter = Limiter(key_func=get_remote_address)
 # Public endpoints
 @router.post(
     "/api/v1/orders",
-    response_model=OrderResponse,
+    response_model=OrderPublicResponse,
     status_code=status.HTTP_201_CREATED,
 )
 @limiter.limit("10/minute")
@@ -54,10 +56,12 @@ async def get_order_status_endpoint(
 async def admin_list_orders(
     artist_id: uuid.UUID | None = None,
     status: str | None = None,
+    pagination: tuple[int, int] = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    return await list_orders(db, artist_id=artist_id, status=status)
+    limit, offset = pagination
+    return await list_orders(db, artist_id=artist_id, status=status, limit=limit, offset=offset)
 
 
 @router.patch("/api/v1/admin/orders/{order_id}/status", response_model=OrderResponse)

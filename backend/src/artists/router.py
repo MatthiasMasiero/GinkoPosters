@@ -19,14 +19,19 @@ from src.artists.service import (
 )
 from src.auth.dependencies import require_admin
 from src.dependencies import get_db
+from src.pagination import pagination_params
 
 router = APIRouter(tags=["artists"])
 
 
 # Public endpoints
 @router.get("/api/v1/artists/", response_model=list[ArtistPublicResponse])
-async def get_active_artists(db: AsyncSession = Depends(get_db)):
-    return await list_active_artists(db)
+async def get_active_artists(
+    pagination: tuple[int, int] = Depends(pagination_params),
+    db: AsyncSession = Depends(get_db),
+):
+    limit, offset = pagination
+    return await list_active_artists(db, limit=limit, offset=offset)
 
 
 @router.get("/api/v1/artists/by-domain/{domain}", response_model=ArtistPublicResponse)
@@ -48,10 +53,12 @@ async def get_artist_by_slug_name(slug: str, db: AsyncSession = Depends(get_db))
 # Admin endpoints
 @router.get("/api/v1/admin/artists", response_model=list[ArtistResponse])
 async def admin_list_artists(
+    pagination: tuple[int, int] = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    return await list_all_artists(db)
+    limit, offset = pagination
+    return await list_all_artists(db, limit=limit, offset=offset)
 
 
 @router.post(

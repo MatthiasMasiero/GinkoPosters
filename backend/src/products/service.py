@@ -9,13 +9,15 @@ from src.products.schemas import ProductCreate, ProductUpdate
 
 
 async def list_products_by_artist(
-    db: AsyncSession, artist_id: uuid.UUID
+    db: AsyncSession, artist_id: uuid.UUID, limit: int = 50, offset: int = 0
 ) -> list[Product]:
     result = await db.execute(
         select(Product)
         .options(selectinload(Product.variants))
         .where(Product.artist_id == artist_id, Product.is_active.is_(True))
         .order_by(Product.title)
+        .limit(limit)
+        .offset(offset)
     )
     return list(result.scalars().all())
 
@@ -29,11 +31,15 @@ async def get_product_by_id(db: AsyncSession, product_id: uuid.UUID) -> Product 
     return result.scalar_one_or_none()
 
 
-async def list_all_products(db: AsyncSession) -> list[Product]:
+async def list_all_products(
+    db: AsyncSession, limit: int = 50, offset: int = 0
+) -> list[Product]:
     result = await db.execute(
         select(Product)
         .options(selectinload(Product.variants))
         .order_by(Product.title)
+        .limit(limit)
+        .offset(offset)
     )
     return list(result.scalars().all())
 
