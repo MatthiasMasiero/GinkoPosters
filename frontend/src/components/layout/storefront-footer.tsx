@@ -1,19 +1,81 @@
 "use client";
 
+import Link from "next/link";
 import { useArtist } from "@/hooks/use-artist";
 
 export function StorefrontFooter() {
   const { artist } = useArtist();
+  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
 
   return (
-    <footer className="border-t px-6 py-8 md:px-12">
-      <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-        <span className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} {artist?.name || "Store"}
-        </span>
-        <span className="text-xs text-muted-foreground/60">
-          Powered by GinkoPosters
-        </span>
+    <footer className="bg-foreground text-background">
+      <div className="mx-auto max-w-7xl px-6 py-16 md:px-12">
+        <div className="grid gap-12 md:grid-cols-3">
+          {/* Brand column */}
+          <div>
+            <p className="text-sm font-extrabold uppercase tracking-[0.08em]">
+              {artist?.name || "Store"}
+            </p>
+            <p className="mt-3 text-sm text-background/60">
+              Curated art prints from independent artists. Gallery-quality,
+              produced on demand.
+            </p>
+          </div>
+
+          {/* Shop links */}
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-background/40">
+              Shop
+            </p>
+            <nav className="mt-4 flex flex-col gap-3">
+              <Link
+                href={`/storefront${artistParam}`}
+                className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+              >
+                All Products
+              </Link>
+              <Link
+                href={`/storefront/cart${artistParam}`}
+                className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+              >
+                Cart
+              </Link>
+            </nav>
+          </div>
+
+          {/* Info links */}
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-background/40">
+              Info
+            </p>
+            <nav className="mt-4 flex flex-col gap-3">
+              <Link
+                href="/"
+                className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+              >
+                GinkoPosters
+              </Link>
+              <Link
+                href={`/storefront/support${artistParam}`}
+                className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+              >
+                Support
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="border-t border-background/10 px-6 py-6 md:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 md:flex-row">
+          <span className="text-xs text-background/40">
+            &copy; {new Date().getFullYear()} {artist?.name || "Store"}
+          </span>
+          <span className="text-xs text-background/40">
+            Powered by GinkoPosters
+          </span>
+        </div>
       </div>
     </footer>
   );

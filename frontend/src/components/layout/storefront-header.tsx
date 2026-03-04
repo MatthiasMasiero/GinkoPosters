@@ -1,55 +1,104 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { Menu, ShoppingBag } from "lucide-react";
 import { useArtist } from "@/hooks/use-artist";
 import { useCart } from "@/hooks/use-cart";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { MobileNavSidebar } from "./mobile-nav-sidebar";
 
 export function StorefrontHeader() {
   const { artist } = useArtist();
   const { itemCount } = useCart();
+  const { scrollDirection, isAtTop } = useScrollDirection();
 
-  const accentColor = artist?.primary_color || "#18181b";
   const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
+  const hidden = scrollDirection === "down" && !isAtTop;
 
   return (
-    <header className="flex items-center justify-between border-b px-6 py-5 md:px-12">
+    <header
+      className="glass fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 transition-transform duration-300 md:px-12"
+      style={{ transform: hidden ? "translateY(-100%)" : "translateY(0)" }}
+    >
+      {/* Mobile hamburger */}
+      <div className="md:hidden">
+        <MobileNavSidebar>
+          <button aria-label="Open menu" className="min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <Menu className="h-5 w-5" />
+          </button>
+        </MobileNavSidebar>
+      </div>
+
+      {/* Artist name */}
       <Link
         href={`/storefront${artistParam}`}
-        className="text-lg font-medium tracking-tight"
-        style={{ color: accentColor }}
+        className="text-sm font-extrabold uppercase tracking-[0.08em]"
       >
         {artist?.name || "Store"}
       </Link>
 
-      <nav className="flex items-center gap-6">
+      {/* Desktop nav */}
+      <nav className="hidden items-center gap-6 md:flex">
         <Link
           href="/"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
         >
-          GinkoPosters
+          <span className="transition-opacity duration-200 group-hover:opacity-0">
+            GinkoPosters
+          </span>
+          <span className="absolute inset-0 italic opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            GinkoPosters
+          </span>
         </Link>
         <Link
           href={`/storefront${artistParam}`}
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
         >
-          Home
+          <span className="transition-opacity duration-200 group-hover:opacity-0">
+            Shop
+          </span>
+          <span className="absolute inset-0 italic opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            Shop
+          </span>
+        </Link>
+        <Link
+          href={`/storefront/support${artistParam}`}
+          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+        >
+          <span className="transition-opacity duration-200 group-hover:opacity-0">
+            Support
+          </span>
+          <span className="absolute inset-0 italic opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            Support
+          </span>
         </Link>
         <Link
           href={`/storefront/cart${artistParam}`}
-          className="relative text-muted-foreground transition-colors hover:text-foreground"
+          aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
+          className="relative text-muted-foreground transition-colors duration-200 hover:text-foreground"
         >
           <ShoppingBag className="h-5 w-5" />
           {itemCount > 0 && (
-            <span
-              className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium text-white"
-              style={{ backgroundColor: accentColor }}
-            >
+            <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-accent-red text-[10px] font-bold text-white">
               {itemCount}
             </span>
           )}
         </Link>
       </nav>
+
+      {/* Mobile cart */}
+      <Link
+        href={`/storefront/cart${artistParam}`}
+        aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
+        className="relative flex min-h-[44px] min-w-[44px] items-center justify-center md:hidden"
+      >
+        <ShoppingBag className="h-5 w-5" />
+        {itemCount > 0 && (
+          <span className="absolute right-0.5 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent-red text-[10px] font-bold text-white">
+            {itemCount}
+          </span>
+        )}
+      </Link>
     </header>
   );
 }
