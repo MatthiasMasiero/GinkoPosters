@@ -77,7 +77,7 @@ export function OrderTable({
                   </p>
                 </div>
               </TableCell>
-              <TableCell>{formatCurrency(order.total)}</TableCell>
+              <TableCell>{formatCurrency(order.subtotal)}</TableCell>
               <TableCell>
                 <OrderStatusBadge status={order.status} />
               </TableCell>

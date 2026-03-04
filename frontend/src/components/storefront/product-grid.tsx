@@ -1,3 +1,4 @@
+import { FadeIn } from "@/components/landing/fade-in";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "./product-card";
 
@@ -15,9 +16,11 @@ export function ProductGrid({ products }: ProductGridProps) {
   }
 
   return (
-    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+    <div className="grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+      {products.map((product, index) => (
+        <FadeIn key={product.id} delay={index * 100}>
+          <ProductCard product={product} />
+        </FadeIn>
       ))}
     </div>
   );

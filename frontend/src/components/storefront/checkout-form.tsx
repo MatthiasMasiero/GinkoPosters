@@ -31,6 +31,8 @@ export function CheckoutForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
@@ -70,7 +72,7 @@ export function CheckoutForm() {
         window.location.href = response.stripe_checkout_url;
       } else {
         clearCart();
-        router.push(`/storefront/order-confirmation?order_id=${response.id}`);
+        router.push(`/storefront/order-confirmation?order_id=${response.id}${artist?.slug ? `&artist=${artist.slug}` : ""}`);
       }
     } catch (err) {
       setSubmitError(
@@ -87,22 +89,23 @@ export function CheckoutForm() {
     placeholder: string;
     type?: string;
     required?: boolean;
+    autoComplete?: string;
   }[] = [
-    { name: "customer_name", label: "Full Name", placeholder: "John Doe", required: true },
-    { name: "customer_email", label: "Email", placeholder: "john@example.com", type: "email", required: true },
-    { name: "shipping_address_line1", label: "Address Line 1", placeholder: "123 Main St", required: true },
-    { name: "shipping_address_line2", label: "Address Line 2", placeholder: "Apt 4B" },
-    { name: "shipping_city", label: "City", placeholder: "Berlin", required: true },
-    { name: "shipping_state", label: "State / Province", placeholder: "Berlin" },
-    { name: "shipping_postal_code", label: "Postal Code", placeholder: "10115", required: true },
-    { name: "shipping_country", label: "Country", placeholder: "Germany", required: true },
+    { name: "customer_name", label: "Full Name", placeholder: "John Doe", required: true, autoComplete: "name" },
+    { name: "customer_email", label: "Email", placeholder: "john@example.com", type: "email", required: true, autoComplete: "email" },
+    { name: "shipping_address_line1", label: "Address Line 1", placeholder: "123 Main St", required: true, autoComplete: "address-line1" },
+    { name: "shipping_address_line2", label: "Address Line 2", placeholder: "Apt 4B", autoComplete: "address-line2" },
+    { name: "shipping_city", label: "City", placeholder: "Berlin", required: true, autoComplete: "address-level2" },
+    { name: "shipping_state", label: "State / Province", placeholder: "Berlin", autoComplete: "address-level1" },
+    { name: "shipping_postal_code", label: "Postal Code", placeholder: "10115", required: true, autoComplete: "postal-code" },
+    { name: "shipping_country", label: "Country", placeholder: "Germany", required: true, autoComplete: "country-name" },
   ];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {fields.map((field) => (
         <div key={field.name}>
-          <Label htmlFor={field.name} className="text-sm">
+          <Label htmlFor={field.name} className="text-xs font-extrabold uppercase tracking-[0.08em]">
             {field.label}
             {field.required && <span className="text-destructive"> *</span>}
           </Label>
@@ -111,7 +114,8 @@ export function CheckoutForm() {
             name={field.name}
             type={field.type || "text"}
             placeholder={field.placeholder}
-            className="mt-1"
+            autoComplete={field.autoComplete}
+            className="mt-2"
           />
           {errors[field.name] && (
             <p className="mt-1 text-xs text-destructive">
@@ -128,7 +132,7 @@ export function CheckoutForm() {
       <Button
         type="submit"
         disabled={submitting || items.length === 0}
-        className="w-full"
+        className="w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]"
       >
         {submitting ? "Processing..." : "Pay with Stripe"}
       </Button>
