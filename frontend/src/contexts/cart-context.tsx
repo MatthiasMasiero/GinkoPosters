@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, Product, ProductVariant } from "@/lib/types";
+import { MULTI_ITEM_DISCOUNT_RATE } from "@/lib/constants";
 
 interface CartContextValue {
   items: CartItem[];
@@ -18,6 +19,9 @@ interface CartContextValue {
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
+  discount: number;
+  discountedSubtotal: number;
+  isItemDiscounted: (item: CartItem) => boolean;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -97,6 +101,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
+  // Group items by artist_id and apply 15% discount for artists with 2+ items
+  const artistItemCounts = items.reduce<Record<string, number>>((acc, item) => {
+    const artistId = item.product.artist_id;
+    acc[artistId] = (acc[artistId] || 0) + item.quantity;
+    return acc;
+  }, {});
+
+  const discountedArtists = new Set(
+    Object.entries(artistItemCounts)
+      .filter(([, count]) => count >= 2)
+      .map(([artistId]) => artistId)
+  );
+
+  const discount = items.reduce((sum, item) => {
+    if (discountedArtists.has(item.product.artist_id)) {
+      return sum + item.variant.price * item.quantity * MULTI_ITEM_DISCOUNT_RATE;
+    }
+    return sum;
+  }, 0);
+
+  const discountedSubtotal = subtotal - discount;
+
+  const isItemDiscounted = useCallback(
+    (item: CartItem) => discountedArtists.has(item.product.artist_id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items]
+  );
+
   return (
     <CartContext.Provider
       value={{
@@ -107,6 +139,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         itemCount,
         subtotal,
+        discount,
+        discountedSubtotal,
+        isItemDiscounted,
       }}
     >
       {children}

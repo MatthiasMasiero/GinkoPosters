@@ -28,3 +28,5 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 export const SHIPPING_COST = 5.99;
+
+export const MULTI_ITEM_DISCOUNT_RATE = 0.15;

@@ -6,7 +6,7 @@ import { CheckoutForm } from "@/components/storefront/checkout-form";
 import { CartSummary } from "@/components/storefront/cart-summary";
 
 export default function CheckoutPage() {
-  const { items, subtotal, itemCount } = useCart();
+  const { items, subtotal, itemCount, discount, discountedSubtotal } = useCart();
 
   if (items.length === 0) {
     return (
@@ -14,7 +14,7 @@ export default function CheckoutPage() {
         <p className="text-muted-foreground">Your cart is empty.</p>
         <Link
           href="/storefront"
-          className="mt-4 inline-block text-sm underline"
+          className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.08em] underline"
         >
           Back to Store
         </Link>
@@ -23,14 +23,16 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="px-6 py-12 md:px-12">
+    <div className="page-enter px-6 py-12 md:px-12">
       <div className="mx-auto max-w-4xl">
-        <h1 className="text-3xl font-light tracking-tight">Checkout</h1>
+        <h1 className="text-3xl font-extrabold uppercase tracking-tight">
+          Checkout
+        </h1>
 
         <div className="mt-8 grid gap-12 lg:grid-cols-3">
           {/* Shipping form */}
           <div className="lg:col-span-2">
-            <h2 className="mb-6 text-sm font-medium uppercase tracking-wider">
+            <h2 className="mb-6 text-xs font-extrabold uppercase tracking-[0.08em]">
               Shipping Address
             </h2>
             <CheckoutForm />
@@ -38,7 +40,7 @@ export default function CheckoutPage() {
 
           {/* Order summary */}
           <div>
-            <CartSummary subtotal={subtotal} itemCount={itemCount} />
+            <CartSummary subtotal={subtotal} discount={discount} discountedSubtotal={discountedSubtotal} itemCount={itemCount} />
           </div>
         </div>
       </div>

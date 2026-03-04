@@ -2,25 +2,30 @@
 
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
+import { useArtist } from "@/hooks/use-artist";
 import { CartItemRow } from "@/components/storefront/cart-item";
 import { CartSummary } from "@/components/storefront/cart-summary";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, subtotal, itemCount } = useCart();
+  const { items, updateQuantity, removeItem, subtotal, itemCount, isItemDiscounted, discount, discountedSubtotal } = useCart();
+  const { artist } = useArtist();
+  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
 
   return (
-    <div className="px-6 py-12 md:px-12">
+    <div className="page-enter px-6 py-12 md:px-12">
       <div className="mx-auto max-w-4xl">
-        <h1 className="text-3xl font-light tracking-tight">Shopping Cart</h1>
+        <h1 className="text-3xl font-extrabold uppercase tracking-tight">
+          Shopping Cart
+        </h1>
 
         {items.length === 0 ? (
           <div className="mt-12 text-center">
             <p className="text-muted-foreground">Your cart is empty.</p>
             <Link
-              href="/storefront"
-              className="mt-4 inline-block text-sm underline"
+              href={`/storefront${artistParam}`}
+              className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground underline transition-colors duration-200 hover:text-foreground"
             >
               Continue Shopping
             </Link>
@@ -34,6 +39,7 @@ export default function CartPage() {
                   {i > 0 && <Separator />}
                   <CartItemRow
                     item={item}
+                    discounted={isItemDiscounted(item)}
                     onUpdateQuantity={updateQuantity}
                     onRemove={removeItem}
                   />
@@ -43,8 +49,8 @@ export default function CartPage() {
               <Separator className="mt-2" />
 
               <Link
-                href="/storefront"
-                className="mt-4 inline-block text-sm text-muted-foreground hover:text-foreground"
+                href={`/storefront${artistParam}`}
+                className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground hover:underline"
               >
                 &larr; Continue Shopping
               </Link>
@@ -52,9 +58,9 @@ export default function CartPage() {
 
             {/* Summary */}
             <div>
-              <CartSummary subtotal={subtotal} itemCount={itemCount} />
-              <Link href="/storefront/checkout" className="mt-4 block">
-                <Button className="w-full" size="lg">
+              <CartSummary subtotal={subtotal} discount={discount} discountedSubtotal={discountedSubtotal} itemCount={itemCount} />
+              <Link href={`/storefront/checkout${artistParam}`} className="mt-4 block">
+                <Button className="w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]" size="lg">
                   Proceed to Checkout
                 </Button>
               </Link>

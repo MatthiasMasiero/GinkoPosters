@@ -6,12 +6,14 @@ import { Separator } from "@/components/ui/separator";
 
 interface CartSummaryProps {
   subtotal: number;
+  discount: number;
+  discountedSubtotal: number;
   itemCount: number;
 }
 
-export function CartSummary({ subtotal, itemCount }: CartSummaryProps) {
+export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount }: CartSummaryProps) {
   const shipping = itemCount > 0 ? SHIPPING_COST : 0;
-  const total = subtotal + shipping;
+  const total = discountedSubtotal + shipping;
 
   return (
     <div className="rounded-lg border p-6">
@@ -24,6 +26,12 @@ export function CartSummary({ subtotal, itemCount }: CartSummaryProps) {
           <span className="text-muted-foreground">Subtotal</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
+        {discount > 0 && (
+          <div className="flex justify-between text-sm">
+            <span className="text-accent-red">Multi-item discount</span>
+            <span className="text-accent-red">-{formatCurrency(discount)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Shipping</span>
           <span>{itemCount > 0 ? formatCurrency(shipping) : "--"}</span>
