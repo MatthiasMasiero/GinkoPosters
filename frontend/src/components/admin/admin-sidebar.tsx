@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Users,
+  Image,
   BarChart3,
   FileDown,
   LogOut,
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/artists", label: "Artists", icon: Users },
+  { href: "/admin/products", label: "Products", icon: Image },
   { href: "/admin/accounting", label: "Accounting", icon: BarChart3 },
   { href: "/admin/export", label: "Export", icon: FileDown },
 ];

@@ -142,6 +142,70 @@ export const api = {
         }),
     },
 
+    products: {
+      list: (params?: { artist_id?: string }) => {
+        const searchParams = new URLSearchParams();
+        if (params?.artist_id)
+          searchParams.set("artist_id", params.artist_id);
+        const qs = searchParams.toString();
+        return fetchAPI<Product[]>(
+          `/api/v1/admin/products${qs ? `?${qs}` : ""}`,
+          { headers: authHeaders() }
+        );
+      },
+      get: (id: string) =>
+        fetchAPI<Product>(`/api/v1/admin/products/${id}`, {
+          headers: authHeaders(),
+        }),
+      create: (data: {
+        artist_id: string;
+        title: string;
+        slug: string;
+        description?: string | null;
+        image_url?: string | null;
+        print_file_key?: string | null;
+        variants: {
+          size: string;
+          sku: string;
+          price: number;
+          cost_price: number;
+        }[];
+      }) =>
+        fetchAPI<Product>("/api/v1/admin/products", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify(data),
+        }),
+      update: (
+        id: string,
+        data: {
+          title?: string;
+          slug?: string;
+          description?: string | null;
+          image_url?: string | null;
+          print_file_key?: string | null;
+          is_active?: boolean;
+        }
+      ) =>
+        fetchAPI<Product>(`/api/v1/admin/products/${id}`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify(data),
+        }),
+    },
+
+    uploads: {
+      getPresignedUrl: (key: string, contentType: string) =>
+        fetchAPI<{ upload_url: string; public_url: string }>(
+          "/api/v1/admin/uploads/presigned-url",
+          {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({ key, content_type: contentType }),
+          }
+        ),
+    },
+
     accounting: {
       summary: (startDate?: string, endDate?: string) => {
         const params = new URLSearchParams();

@@ -46,6 +46,18 @@ async def get_product(product_id: uuid.UUID, db: AsyncSession = Depends(get_db))
 
 
 # Admin endpoints
+@router.get("/api/v1/admin/products/{product_id}", response_model=ProductResponse)
+async def admin_get_product(
+    product_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    product = await get_product_by_id(db, product_id)
+    if product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    return product
+
+
 @router.get("/api/v1/admin/products", response_model=list[ProductResponse])
 async def admin_list_products(
     pagination: tuple[int, int] = Depends(pagination_params),

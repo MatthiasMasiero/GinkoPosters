@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { api } from "@/lib/api-client";
 import type { Artist } from "@/lib/types";
 
@@ -17,6 +18,7 @@ export function ArtistForm({ artist }: ArtistFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState(artist?.logo_url || "");
 
   const isEdit = !!artist;
 
@@ -33,7 +35,7 @@ export function ArtistForm({ artist }: ArtistFormProps) {
       bio: (formData.get("bio") as string) || null,
       primary_color: (formData.get("primary_color") as string) || "#000000",
       secondary_color: (formData.get("secondary_color") as string) || "#FFFFFF",
-      logo_url: (formData.get("logo_url") as string) || null,
+      logo_url: logoUrl || null,
       is_active: formData.get("is_active") === "on",
     };
 
@@ -104,14 +106,14 @@ export function ArtistForm({ artist }: ArtistFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="logo_url">Logo URL</Label>
-        <Input
-          id="logo_url"
-          name="logo_url"
-          defaultValue={artist?.logo_url || ""}
-          placeholder="https://..."
-          className="mt-1"
-        />
+        <Label>Logo</Label>
+        <div className="mt-1">
+          <ImageUpload
+            folder={`logos/${artist?.slug || "new"}`}
+            currentUrl={artist?.logo_url}
+            onUpload={setLogoUrl}
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

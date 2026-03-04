@@ -17,6 +17,7 @@ from src.fulfillment.router import router as fulfillment_router
 from src.orders.router import router as orders_router
 from src.payments.router import router as payments_router
 from src.products.router import router as products_router
+from src.storage.router import router as storage_router
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +136,7 @@ app.include_router(orders_router)
 app.include_router(payments_router)
 app.include_router(fulfillment_router)
 app.include_router(accounting_router)
+app.include_router(storage_router)
 
 
 @app.get("/health")
