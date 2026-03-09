@@ -26,6 +26,8 @@ def upgrade() -> None:
         sa.Column("email", sa.String(255), nullable=False),
         sa.Column("password_hash", sa.String(255), nullable=False),
         sa.Column("role", sa.String(50), nullable=False),
+        sa.Column("failed_login_attempts", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("locked_until", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
@@ -157,8 +159,21 @@ def upgrade() -> None:
     op.create_index(op.f("ix_transactions_artist_id"), "transactions", ["artist_id"])
     op.create_index(op.f("ix_transactions_created_at"), "transactions", ["created_at"])
 
+    # Token blacklist table
+    op.create_table(
+        "token_blacklist",
+        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("jti", sa.String(255), nullable=False),
+        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_token_blacklist")),
+        sa.UniqueConstraint("jti", name=op.f("uq_token_blacklist_jti")),
+    )
+    op.create_index(op.f("ix_token_blacklist_jti"), "token_blacklist", ["jti"])
+
 
 def downgrade() -> None:
+    op.drop_table("token_blacklist")
     op.drop_table("transactions")
     op.drop_table("order_items")
     op.drop_table("orders")

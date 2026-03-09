@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import require_admin
 from src.dependencies import get_db
+from src.emails.service import send_shipping_notification
 from src.pagination import pagination_params
 from src.orders.schemas import (
     OrderCreate,
@@ -74,4 +75,6 @@ async def admin_update_order_status(
     order = await update_order_status(db, order_id, body.status, body.notes)
     if order is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    if body.status == "shipped":
+        await send_shipping_notification(order)
     return order

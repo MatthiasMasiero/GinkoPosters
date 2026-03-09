@@ -30,3 +30,8 @@ postgres_data/
 
 # Worktrees
 .worktrees/
+
+# Asset folders (not for version control)
+Ginko Posters MEGA FOLDER/
+MadeByGray Poster Files/
+PRICING & Legal Ginko Posters/

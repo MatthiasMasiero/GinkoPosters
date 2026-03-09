@@ -9,8 +9,30 @@ const archivo = Archivo({
 });
 
 export const metadata: Metadata = {
-  title: "GinkoPosters",
-  description: "Curated art prints from independent artists",
+  title: {
+    default: "Ginko Posters — Curated Art Prints from Independent Artists",
+    template: "%s | Ginko Posters",
+  },
+  description:
+    "Discover and collect premium art prints from independent artists. Every poster is produced on demand with high-quality materials and shipped directly to your door.",
+  metadataBase: new URL("https://ginkoposters.com"),
+  openGraph: {
+    title: "Ginko Posters — Curated Art Prints from Independent Artists",
+    description:
+      "Discover and collect premium art prints from independent artists. Produced on demand, shipped to your door.",
+    siteName: "Ginko Posters",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ginko Posters",
+    description:
+      "Curated art prints from independent artists. Premium quality, shipped to your door.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

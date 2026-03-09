@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'admin',
+    failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+    locked_until TIMESTAMPTZ,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -66,6 +68,7 @@ CREATE TABLE IF NOT EXISTS orders (
     shipping_postal_code VARCHAR(20) NOT NULL,
     shipping_country VARCHAR(100) NOT NULL,
     subtotal NUMERIC(10, 2) NOT NULL,
+    discount NUMERIC(10, 2) NOT NULL DEFAULT 0,
     stripe_session_id VARCHAR(255),
     stripe_payment_intent_id VARCHAR(255),
     notes TEXT,
@@ -95,6 +98,16 @@ CREATE TABLE IF NOT EXISTS transactions (
     net_profit NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Token blacklist table
+CREATE TABLE IF NOT EXISTS token_blacklist (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    jti VARCHAR(255) UNIQUE NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_token_blacklist_jti ON token_blacklist(jti);
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_artists_slug ON artists(slug);

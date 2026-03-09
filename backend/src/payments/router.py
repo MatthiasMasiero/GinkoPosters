@@ -1,7 +1,11 @@
+import logging
+
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
@@ -53,5 +57,13 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     elif event["type"] == "charge.refunded":
         charge = event["data"]["object"]
         await handle_charge_refunded(db, charge["payment_intent"])
+    elif event["type"] == "payment_intent.payment_failed":
+        payment_intent = event["data"]["object"]
+        failure_message = payment_intent.get("last_payment_error", {}).get("message", "Unknown error")
+        logger.warning(
+            "Payment failed for intent %s: %s",
+            payment_intent.get("id"),
+            failure_message,
+        )
 
     return {"status": "ok"}

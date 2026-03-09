@@ -8,12 +8,50 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.accounting.models import Transaction
 from src.artists.models import Artist
+from src.orders.models import Order
 
 
 def _date_to_datetime(d: date, end: bool = False) -> datetime:
     if end:
         return datetime.combine(d, time.max, tzinfo=timezone.utc)
     return datetime.combine(d, time.min, tzinfo=timezone.utc)
+
+
+async def get_dashboard_stats(db: AsyncSession) -> dict:
+    today = date.today()
+    start_of_day = datetime.combine(today, time.min)
+    end_of_day = datetime.combine(today, time.max)
+
+    total_orders_result = await db.execute(select(func.count(Order.id)))
+    total_orders = total_orders_result.scalar() or 0
+
+    revenue_result = await db.execute(
+        select(func.coalesce(func.sum(Transaction.revenue), 0)).where(
+            Transaction.created_at >= start_of_day,
+            Transaction.created_at <= end_of_day,
+            Transaction.type == "sale",
+        )
+    )
+    revenue_today = float(revenue_result.scalar() or 0)
+
+    pending_result = await db.execute(
+        select(func.count(Order.id)).where(
+            Order.status.in_(["pending_payment", "paid"])
+        )
+    )
+    pending_orders = pending_result.scalar() or 0
+
+    artists_result = await db.execute(
+        select(func.count(Artist.id)).where(Artist.is_active == True)
+    )
+    artists_count = artists_result.scalar() or 0
+
+    return {
+        "total_orders": total_orders,
+        "revenue_today": revenue_today,
+        "pending_orders": pending_orders,
+        "artists_count": artists_count,
+    }
 
 
 async def get_summary(

@@ -58,6 +58,7 @@ export interface Order {
   shipping_postal_code: string;
   shipping_country: string;
   subtotal: number;
+  discount: number;
   stripe_session_id: string | null;
   notes: string | null;
   items: OrderItem[];

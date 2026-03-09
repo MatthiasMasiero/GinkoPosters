@@ -32,6 +32,7 @@ class Order(Base):
     shipping_postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
     shipping_country: Mapped[str] = mapped_column(String(100), nullable=False)
     subtotal: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
+    discount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     stripe_session_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     stripe_payment_intent_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)

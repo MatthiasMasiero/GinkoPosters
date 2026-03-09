@@ -9,10 +9,10 @@ import { api } from "@/lib/api-client";
 import type { Artist, Product } from "@/lib/types";
 
 const FALLBACK_POSTERS = [
-  { src: "/posters/matthias/new-york.avif", title: "New York", alt: "New York poster" },
-  { src: "/posters/sean/surf.jpeg", title: "Surf", alt: "Surf poster" },
-  { src: "/posters/matthias/rio-brasil.jpg", title: "Rio Brasil", alt: "Rio Brasil poster" },
-  { src: "/posters/sean/surf-van.jpg", title: "Surf Van", alt: "Surf van poster" },
+  { src: "/images/madebygray/travis-scott.jpg", title: "Travis Scott", alt: "Travis Scott poster" },
+  { src: "/images/madebygray/jordan-barrett.jpg", title: "Jordan Barrett", alt: "Jordan Barrett poster" },
+  { src: "/images/madebygray/bape-x-kidsuper.jpg", title: "Bape x KidSuper", alt: "Bape x KidSuper poster" },
+  { src: "/images/madebygray/yohji-yamamoto-aw1998.jpg", title: "Yohji Yamamoto AW1998", alt: "Yohji Yamamoto AW1998 poster" },
 ];
 
 export default function LandingPage() {

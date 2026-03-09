@@ -3,16 +3,40 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, Minus, Plus } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useCart } from "@/hooks/use-cart";
 import { useArtist } from "@/hooks/use-artist";
 import { FadeIn } from "@/components/landing/fade-in";
+import { ImageGallery } from "@/components/storefront/image-gallery";
 import { SizeSelector } from "@/components/storefront/size-selector";
 import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+
+const MOCKUP_COUNT = 3;
+
+function getGalleryImages(product: Product): { src: string; alt: string }[] {
+  const images: { src: string; alt: string }[] = [];
+
+  if (product.image_url) {
+    images.push({ src: product.image_url, alt: product.title });
+  }
+
+  // Derive mockup paths from product slug
+  // Images live at /images/madebygray/<slug>/mockup-{1,2,3}.jpg
+  const base = product.image_url?.replace(/\/[^/]+$/, "");
+  if (base) {
+    for (let i = 1; i <= MOCKUP_COUNT; i++) {
+      images.push({
+        src: `${base}/${product.slug}/mockup-${i}.jpg`,
+        alt: `${product.title} — room view ${i}`,
+      });
+    }
+  }
+
+  return images;
+}
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -99,26 +123,9 @@ export default function ProductDetailPage() {
         )}
 
         <div className="grid gap-12 md:grid-cols-2">
-          {/* Product image */}
+          {/* Product images */}
           <FadeIn direction="left">
-            <div className="relative aspect-[3/4] overflow-hidden border border-border bg-muted">
-              {product.image_url ? (
-                <Image
-                  src={product.image_url}
-                  alt={product.title}
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <span className="text-muted-foreground/50">
-                    {product.title}
-                  </span>
-                </div>
-              )}
-            </div>
+            <ImageGallery images={getGalleryImages(product)} />
           </FadeIn>
 
           {/* Product info */}

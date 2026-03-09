@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.accounting.models import Transaction
 from src.config import settings
+from src.emails.service import send_order_confirmation
 from src.orders.service import get_order_by_id, get_order_by_stripe_session
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -20,18 +21,44 @@ async def create_checkout_session(
     if order is None:
         raise ValueError("Order not found")
 
+    # Calculate discount factor for distributing across line items
+    discount_rate = float(order.discount) / float(order.subtotal) if float(order.subtotal) > 0 else 0
+
     line_items = []
     for item in order.items:
+        # Build product name from variant's product title + size
+        product_title = "Poster"
+        size_label = ""
+        if hasattr(item, "variant") and item.variant:
+            size_label = item.variant.size or ""
+            if hasattr(item.variant, "product") and item.variant.product:
+                product_title = item.variant.product.title
+        name = f"{product_title} — {size_label}" if size_label else product_title
+
+        # Apply discount proportionally to each line item
+        unit_price = float(item.unit_price) * (1 - discount_rate)
         line_items.append(
             {
                 "price_data": {
                     "currency": "eur",
-                    "unit_amount": int(float(item.unit_price) * 100),
-                    "product_data": {"name": f"Poster (Order {order.order_number})"},
+                    "unit_amount": int(round(unit_price * 100)),
+                    "product_data": {"name": name},
                 },
                 "quantity": item.quantity,
             }
         )
+
+    # Add flat-rate shipping
+    line_items.append(
+        {
+            "price_data": {
+                "currency": "eur",
+                "unit_amount": int(settings.SHIPPING_COST_EUR * 100),
+                "product_data": {"name": "Shipping"},
+            },
+            "quantity": 1,
+        }
+    )
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -64,8 +91,8 @@ async def handle_checkout_completed(db: AsyncSession, session_id: str) -> None:
     session = stripe.checkout.Session.retrieve(session_id)
     order.stripe_payment_intent_id = session.payment_intent
 
-    # Calculate financials
-    total_revenue = float(order.subtotal)
+    # Calculate financials (revenue = subtotal after discount)
+    total_revenue = float(order.subtotal) - float(order.discount)
     total_cogs = sum(float(item.cost_price) * item.quantity for item in order.items)
     stripe_fee = round(total_revenue * STRIPE_FEE_PERCENT + STRIPE_FEE_FIXED, 2)
     net_profit = round(total_revenue - total_cogs - stripe_fee, 2)
@@ -81,6 +108,8 @@ async def handle_checkout_completed(db: AsyncSession, session_id: str) -> None:
     )
     db.add(transaction)
     await db.flush()
+
+    await send_order_confirmation(order)
 
 
 async def handle_charge_refunded(db: AsyncSession, payment_intent_id: str) -> None:
@@ -100,7 +129,7 @@ async def handle_charge_refunded(db: AsyncSession, payment_intent_id: str) -> No
 
     order.status = "refunded"
 
-    total_revenue = float(order.subtotal)
+    total_revenue = float(order.subtotal) - float(order.discount)
     total_cogs = sum(float(item.cost_price) * item.quantity for item in order.items)
     stripe_fee = round(total_revenue * STRIPE_FEE_PERCENT + STRIPE_FEE_FIXED, 2)
 

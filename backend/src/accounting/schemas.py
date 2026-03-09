@@ -23,6 +23,13 @@ class DailyDigestRequest(BaseModel):
     end_date: date
 
 
+class DashboardStats(BaseModel):
+    total_orders: int
+    revenue_today: float
+    pending_orders: int
+    artists_count: int
+
+
 class ArtistPayoutSummary(BaseModel):
     artist_id: uuid.UUID
     artist_name: str

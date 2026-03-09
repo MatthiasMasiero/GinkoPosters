@@ -56,6 +56,7 @@ class OrderPublicResponse(BaseModel):
     shipping_postal_code: str
     shipping_country: str
     subtotal: float
+    discount: float
     notes: str | None
     created_at: datetime
     updated_at: datetime
@@ -78,6 +79,7 @@ class OrderResponse(BaseModel):
     shipping_postal_code: str
     shipping_country: str
     subtotal: float
+    discount: float
     stripe_session_id: str | None
     notes: str | None
     created_at: datetime

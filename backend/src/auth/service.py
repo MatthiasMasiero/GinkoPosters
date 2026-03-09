@@ -85,6 +85,16 @@ async def authenticate_user(
     return user
 
 
+async def change_password(
+    db: AsyncSession, user: User, current_password: str, new_password: str
+) -> bool:
+    if not verify_password(current_password, user.password_hash):
+        return False
+    user.password_hash = hash_password(new_password)
+    await db.flush()
+    return True
+
+
 async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()

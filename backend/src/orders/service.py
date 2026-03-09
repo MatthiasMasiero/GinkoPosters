@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from src.config import settings
 from src.orders.models import Order, OrderItem
 from src.orders.schemas import VALID_ORDER_STATUSES, OrderCreate
 from src.products.models import Product, ProductVariant
@@ -53,6 +54,13 @@ async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
             )
         )
 
+    # Apply multi-item discount: 15% off when 2+ total items from the same artist
+    total_quantity = sum(item.quantity for item in data.items)
+    if total_quantity >= 2:
+        discount = round(subtotal * settings.MULTI_ITEM_DISCOUNT_RATE, 2)
+    else:
+        discount = 0.0
+
     order = Order(
         order_number=_generate_order_number(),
         artist_id=data.artist_id,
@@ -65,6 +73,7 @@ async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
         shipping_postal_code=data.shipping_postal_code,
         shipping_country=data.shipping_country,
         subtotal=subtotal,
+        discount=discount,
         status="pending_payment",
     )
     db.add(order)
@@ -81,7 +90,13 @@ async def create_order(db: AsyncSession, data: OrderCreate) -> Order:
 
 async def get_order_by_id(db: AsyncSession, order_id: uuid.UUID) -> Order | None:
     result = await db.execute(
-        select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+        select(Order)
+        .options(
+            selectinload(Order.items)
+            .selectinload(OrderItem.variant)
+            .selectinload(ProductVariant.product)
+        )
+        .where(Order.id == order_id)
     )
     return result.scalar_one_or_none()
 
@@ -98,7 +113,11 @@ async def list_orders(
     limit: int = 50,
     offset: int = 0,
 ) -> list[Order]:
-    query = select(Order).options(selectinload(Order.items)).order_by(Order.created_at.desc())
+    query = select(Order).options(
+        selectinload(Order.items)
+        .selectinload(OrderItem.variant)
+        .selectinload(ProductVariant.product)
+    ).order_by(Order.created_at.desc())
     if artist_id is not None:
         query = query.where(Order.artist_id == artist_id)
     if status is not None:
@@ -132,7 +151,11 @@ async def get_order_by_stripe_session(
 ) -> Order | None:
     result = await db.execute(
         select(Order)
-        .options(selectinload(Order.items))
+        .options(
+            selectinload(Order.items)
+            .selectinload(OrderItem.variant)
+            .selectinload(ProductVariant.product)
+        )
         .where(Order.stripe_session_id == session_id)
     )
     return result.scalar_one_or_none()

@@ -8,6 +8,7 @@ _PLACEHOLDER_SECRETS = {
     "change-this-in-production-use-a-long-random-string",
     "sk_test_placeholder",
     "whsec_placeholder",
+    "re_placeholder",
 }
 
 
@@ -32,6 +33,16 @@ class Settings(BaseSettings):
     AWS_DEFAULT_REGION: str = "eu-central-1"
     S3_BUCKET_NAME: str = "ginkoposters-print-files"
 
+    # Resend (email)
+    RESEND_API_KEY: str = "re_placeholder"
+    FROM_EMAIL: str = "Ginko Posters <noreply@ginkoposters.com>"
+
+    # Shipping
+    SHIPPING_COST_EUR: float = 5.99
+
+    # Discount
+    MULTI_ITEM_DISCOUNT_RATE: float = 0.15
+
     # App
     PRIMARY_DOMAIN: str = "localhost"
     BACKEND_URL: str = "http://localhost:8000"
@@ -50,6 +61,8 @@ class Settings(BaseSettings):
                 errors.append("STRIPE_SECRET_KEY is still a placeholder")
             if self.STRIPE_WEBHOOK_SECRET in _PLACEHOLDER_SECRETS:
                 errors.append("STRIPE_WEBHOOK_SECRET is still a placeholder")
+            if self.RESEND_API_KEY in _PLACEHOLDER_SECRETS:
+                errors.append("RESEND_API_KEY is still a placeholder")
             if len(self.JWT_SECRET_KEY) < 32:
                 errors.append("JWT_SECRET_KEY must be at least 32 characters")
             if errors:
@@ -64,6 +77,10 @@ class Settings(BaseSettings):
             if self.STRIPE_SECRET_KEY in _PLACEHOLDER_SECRETS:
                 logger.warning(
                     "STRIPE_SECRET_KEY is using a placeholder value — do not use in production"
+                )
+            if self.RESEND_API_KEY in _PLACEHOLDER_SECRETS:
+                logger.warning(
+                    "RESEND_API_KEY is using a placeholder value — emails will not be sent"
                 )
 
 

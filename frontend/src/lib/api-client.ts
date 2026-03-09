@@ -58,7 +58,7 @@ export const api = {
       shipping_country: string;
       items: { product_id: string; variant_id: string; quantity: number }[];
     }) =>
-      fetchAPI<{ id: string; stripe_checkout_url: string }>("/api/v1/orders", {
+      fetchAPI<{ id: string; order_number: string; status: string }>("/api/v1/orders", {
         method: "POST",
         body: JSON.stringify(data),
       }),
@@ -221,7 +221,7 @@ export const api = {
 
     export: {
       csv: (orderIds: string[]) =>
-        fetch(`${BACKEND_URL}/api/v1/admin/export/csv`, {
+        fetch(`${BACKEND_URL}/api/v1/admin/fulfillment/export-csv`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -233,8 +233,8 @@ export const api = {
           return res.blob();
         }),
       markSent: (orderIds: string[]) =>
-        fetchAPI<{ updated: number }>(
-          "/api/v1/admin/export/mark-sent",
+        fetchAPI<{ updated_count: number }>(
+          "/api/v1/admin/fulfillment/mark-sent",
           {
             method: "POST",
             headers: authHeaders(),

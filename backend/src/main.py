@@ -2,10 +2,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from sqlalchemy import text
 
 from src.accounting.router import router as accounting_router
@@ -21,7 +19,15 @@ from src.storage.router import router as storage_router
 
 logger = logging.getLogger(__name__)
 
-limiter = Limiter(key_func=get_remote_address)
+
+def _get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "127.0.0.1"
+
+
+limiter = Limiter(key_func=_get_client_ip)
 
 
 @asynccontextmanager
@@ -88,7 +94,21 @@ async def audit_log(request: Request, call_next):
 # Security headers + dynamic CORS middleware
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
-    response: Response = await call_next(request)
+    origin = request.headers.get("origin")
+    allowed = getattr(request.app.state, "allowed_origins", ["http://localhost:3000"])
+    is_allowed_origin = origin and origin in allowed
+
+    # Handle preflight OPTIONS requests
+    if request.method == "OPTIONS" and is_allowed_origin:
+        response = Response(status_code=204)
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
+        response.headers["Access-Control-Max-Age"] = "600"
+        return response
+
+    response = await call_next(request)
 
     # Security headers
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -100,9 +120,7 @@ async def security_middleware(request: Request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
 
     # Dynamic CORS
-    origin = request.headers.get("origin")
-    allowed = getattr(request.app.state, "allowed_origins", ["http://localhost:3000"])
-    if origin and origin in allowed:
+    if is_allowed_origin:
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -118,15 +136,6 @@ async def limit_request_body(request: Request, call_next):
         return Response(content="Request body too large", status_code=413)
     return await call_next(request)
 
-
-# Also add standard CORS middleware as fallback for preflight requests
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
-)
 
 # Include routers
 app.include_router(auth_router)

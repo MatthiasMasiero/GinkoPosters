@@ -65,14 +65,19 @@ export function CheckoutForm() {
         })),
       };
 
-      const response = await api.orders.create(orderData);
+      const order = await api.orders.create(orderData);
 
-      if (response.stripe_checkout_url) {
+      // Create Stripe checkout session and redirect to payment
+      const { checkout_url } = await api.payments.createCheckoutSession({
+        order_id: order.id,
+      });
+
+      if (checkout_url) {
         clearCart();
-        window.location.href = response.stripe_checkout_url;
+        window.location.href = checkout_url;
       } else {
         clearCart();
-        router.push(`/storefront/order-confirmation?order_id=${response.id}${artist?.slug ? `&artist=${artist.slug}` : ""}`);
+        router.push(`/storefront/order-confirmation?order_id=${order.id}${artist?.slug ? `&artist=${artist.slug}` : ""}`);
       }
     } catch (err) {
       setSubmitError(

@@ -32,3 +32,13 @@ services:
         sync: false
       - key: PRIMARY_DOMAIN
         sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        value: "Ginko Posters <noreply@ginkoposters.com>"
+
+databases:
+  - name: ginkoposters-db
+    plan: free
+    databaseName: ginkoposters
+    user: ginko

@@ -5,7 +5,19 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "*.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "ginkoposters.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.ginkoposters.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
       },
     ],
   },

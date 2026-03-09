@@ -14,6 +14,11 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(..., min_length=8, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
 class UserResponse(BaseModel):
     id: uuid.UUID
     email: str
