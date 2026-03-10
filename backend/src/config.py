@@ -17,6 +17,14 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://ginko:ginko_dev@localhost:5432/ginkoposters"
     DATABASE_URL_SYNC: str = "postgresql://ginko:ginko_dev@localhost:5432/ginkoposters"
 
+    @property
+    def async_database_url(self) -> str:
+        """Return DATABASE_URL with asyncpg driver, converting if needed."""
+        url = self.DATABASE_URL
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
+
     # Stripe
     STRIPE_SECRET_KEY: str = "sk_test_placeholder"
     STRIPE_PUBLISHABLE_KEY: str = "pk_test_placeholder"

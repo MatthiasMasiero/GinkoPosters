@@ -15,9 +15,13 @@ from src.products.models import Product, ProductVariant  # noqa: F401
 
 config = context.config
 
-# Override sqlalchemy.url with DATABASE_URL_SYNC from environment if available
-database_url = os.environ.get("DATABASE_URL_SYNC")
+# Override sqlalchemy.url with DATABASE_URL_SYNC or DATABASE_URL from environment
+# Railway provides DATABASE_URL in postgresql:// format which works for sync
+database_url = os.environ.get("DATABASE_URL_SYNC") or os.environ.get("DATABASE_URL")
 if database_url:
+    # Ensure sync driver (strip asyncpg if present)
+    if "+asyncpg" in database_url:
+        database_url = database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 
 if config.config_file_name is not None:
