@@ -70,7 +70,9 @@ class Settings(BaseSettings):
             if self.STRIPE_WEBHOOK_SECRET in _PLACEHOLDER_SECRETS:
                 errors.append("STRIPE_WEBHOOK_SECRET is still a placeholder")
             if self.RESEND_API_KEY in _PLACEHOLDER_SECRETS:
-                errors.append("RESEND_API_KEY is still a placeholder")
+                logger.warning(
+                    "RESEND_API_KEY is using a placeholder value — emails will not be sent"
+                )
             if len(self.JWT_SECRET_KEY) < 32:
                 errors.append("JWT_SECRET_KEY must be at least 32 characters")
             if errors:
