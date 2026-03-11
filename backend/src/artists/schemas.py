@@ -15,7 +15,7 @@ class ArtistBase(BaseModel):
 
 
 class ArtistCreate(ArtistBase):
-    pass
+    is_active: bool = True
 
 
 class ArtistUpdate(BaseModel):

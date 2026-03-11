@@ -19,7 +19,14 @@ async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
     const error = await res
       .json()
       .catch(() => ({ detail: "Request failed" }));
-    throw new Error(error.detail || `API error: ${res.status}`);
+    const detail = error.detail;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d: { msg?: string }) => d.msg || JSON.stringify(d)).join(", ")
+          : `API error: ${res.status}`;
+    throw new Error(message);
   }
   return res.json();
 }
