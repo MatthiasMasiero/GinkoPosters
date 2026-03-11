@@ -38,6 +38,7 @@ class ProductBase(BaseModel):
     slug: str = Field(..., min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
     description: str | None = Field(default=None, max_length=5000)
     image_url: str | None = Field(default=None, max_length=500)
+    gallery_urls: list[str] = Field(default=[])
     print_file_key: str | None = Field(default=None, max_length=500)
 
 
@@ -51,6 +52,7 @@ class ProductUpdate(BaseModel):
     slug: str | None = Field(default=None, min_length=1, max_length=255, pattern=r"^[a-z0-9\-]+$")
     description: str | None = Field(default=None, max_length=5000)
     image_url: str | None = Field(default=None, max_length=500)
+    gallery_urls: list[str] | None = None
     print_file_key: str | None = Field(default=None, max_length=500)
     is_active: bool | None = None
 
@@ -73,6 +75,7 @@ class ProductPublicResponse(BaseModel):
     slug: str
     description: str | None
     image_url: str | None
+    gallery_urls: list[str] = []
     is_active: bool
     variants: list[VariantPublicResponse] = []
 

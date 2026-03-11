@@ -13,6 +13,63 @@ interface ImageUploadProps {
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+const COMPRESS_MAX_DIMENSION = 2400;
+const COMPRESS_QUALITY = 0.82;
+
+function compressImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    if (file.size <= MAX_SIZE) {
+      resolve(file);
+      return;
+    }
+
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+
+      let { width, height } = img;
+      if (width > COMPRESS_MAX_DIMENSION || height > COMPRESS_MAX_DIMENSION) {
+        const ratio = Math.min(
+          COMPRESS_MAX_DIMENSION / width,
+          COMPRESS_MAX_DIMENSION / height
+        );
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Could not get canvas context"));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Compression failed"));
+            return;
+          }
+          const compressed = new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+            type: "image/jpeg",
+          });
+          resolve(compressed);
+        },
+        "image/jpeg",
+        COMPRESS_QUALITY
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image for compression"));
+    };
+    img.src = url;
+  });
+}
 
 export function ImageUpload({ onUpload, currentUrl, folder }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentUrl || null);
@@ -26,26 +83,30 @@ export function ImageUpload({ onUpload, currentUrl, folder }: ImageUploadProps) 
         setError("Only JPEG, PNG, and WebP images are allowed.");
         return;
       }
-      if (file.size > MAX_SIZE) {
-        setError("File must be smaller than 10 MB.");
-        return;
-      }
 
       setError(null);
       setUploading(true);
 
       try {
+        const processed = await compressImage(file);
+
+        if (processed.size > MAX_SIZE) {
+          setError("Image is still too large after compression. Try a smaller image.");
+          setUploading(false);
+          return;
+        }
+
         const timestamp = Date.now();
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const safeName = processed.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const key = `${folder}/${timestamp}-${safeName}`;
 
         const { upload_url, public_url } =
-          await api.admin.uploads.getPresignedUrl(key, file.type);
+          await api.admin.uploads.getPresignedUrl(key, processed.type);
 
         const uploadRes = await fetch(upload_url, {
           method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file,
+          headers: { "Content-Type": processed.type },
+          body: processed,
         });
 
         if (!uploadRes.ok) {

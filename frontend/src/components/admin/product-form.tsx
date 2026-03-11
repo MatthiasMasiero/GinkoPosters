@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { GalleryUpload } from "@/components/admin/gallery-upload";
 import { api } from "@/lib/api-client";
 import type { Artist, Product } from "@/lib/types";
 
@@ -51,6 +52,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const [slug, setSlug] = useState(product?.slug || "");
   const [description, setDescription] = useState(product?.description || "");
   const [imageUrl, setImageUrl] = useState(product?.image_url || "");
+  const [galleryUrls, setGalleryUrls] = useState<string[]>(product?.gallery_urls || []);
   const [isActive, setIsActive] = useState(product?.is_active ?? true);
   const [slugEdited, setSlugEdited] = useState(false);
 
@@ -121,6 +123,7 @@ export function ProductForm({ product }: ProductFormProps) {
           slug,
           description: description || null,
           image_url: imageUrl || null,
+          gallery_urls: galleryUrls,
           is_active: isActive,
         });
       } else {
@@ -130,6 +133,7 @@ export function ProductForm({ product }: ProductFormProps) {
           slug,
           description: description || null,
           image_url: imageUrl || null,
+          gallery_urls: galleryUrls,
           variants: variants.map((v) => ({
             size: v.size,
             sku: v.sku,
@@ -216,6 +220,18 @@ export function ProductForm({ product }: ProductFormProps) {
             onUpload={setImageUrl}
           />
         </div>
+      </div>
+
+      <div>
+        <Label>Gallery Images</Label>
+        <p className="mb-2 text-xs text-muted-foreground">
+          Additional images (mockups, room views) that customers can flip through. Large images are auto-compressed.
+        </p>
+        <GalleryUpload
+          urls={galleryUrls}
+          onChange={setGalleryUrls}
+          folder={`posters/${selectedArtist?.slug || "unknown"}`}
+        />
       </div>
 
       {isEdit && (

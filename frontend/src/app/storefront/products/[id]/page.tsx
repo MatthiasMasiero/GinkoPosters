@@ -14,8 +14,6 @@ import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
-const MOCKUP_COUNT = 3;
-
 function getGalleryImages(product: Product): { src: string; alt: string }[] {
   const images: { src: string; alt: string }[] = [];
 
@@ -23,16 +21,13 @@ function getGalleryImages(product: Product): { src: string; alt: string }[] {
     images.push({ src: product.image_url, alt: product.title });
   }
 
-  // Derive mockup paths from product slug
-  // Images live at /images/madebygray/<slug>/mockup-{1,2,3}.jpg
-  const base = product.image_url?.replace(/\/[^/]+$/, "");
-  if (base) {
-    for (let i = 1; i <= MOCKUP_COUNT; i++) {
+  if (product.gallery_urls?.length > 0) {
+    product.gallery_urls.forEach((url, i) => {
       images.push({
-        src: `${base}/${product.slug}/mockup-${i}.jpg`,
-        alt: `${product.title} — room view ${i}`,
+        src: url,
+        alt: `${product.title} — view ${i + 1}`,
       });
-    }
+    });
   }
 
   return images;

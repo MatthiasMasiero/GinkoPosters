@@ -177,6 +177,7 @@ export const api = {
         slug: string;
         description?: string | null;
         image_url?: string | null;
+        gallery_urls?: string[];
         print_file_key?: string | null;
         variants: {
           size: string;
@@ -197,6 +198,7 @@ export const api = {
           slug?: string;
           description?: string | null;
           image_url?: string | null;
+          gallery_urls?: string[];
           print_file_key?: string | null;
           is_active?: boolean;
         }
