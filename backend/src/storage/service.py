@@ -54,7 +54,6 @@ def generate_upload_url(key: str, content_type: str = "application/pdf") -> str:
             "Bucket": settings.S3_BUCKET_NAME,
             "Key": key,
             "ContentType": content_type,
-            "ContentLength": MAX_UPLOAD_SIZE,
         },
         ExpiresIn=ADMIN_PREVIEW_EXPIRY,
     )
