@@ -11,7 +11,9 @@ from src.artists.schemas import (
 )
 from src.artists.service import (
     create_artist,
+    delete_artist,
     get_artist_by_domain,
+    get_artist_by_id,
     get_artist_by_slug,
     list_active_artists,
     list_all_artists,
@@ -85,3 +87,29 @@ async def admin_update_artist(
     if artist is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artist not found")
     return artist
+
+
+@router.get("/api/v1/admin/artists/{artist_id}", response_model=ArtistResponse)
+async def admin_get_artist(
+    artist_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    artist = await get_artist_by_id(db, artist_id)
+    if artist is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artist not found")
+    return artist
+
+
+@router.delete(
+    "/api/v1/admin/artists/{artist_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def admin_delete_artist(
+    artist_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    deleted = await delete_artist(db, artist_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artist not found")

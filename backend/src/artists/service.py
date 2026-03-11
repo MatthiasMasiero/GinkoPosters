@@ -65,6 +65,15 @@ async def update_artist(
     return artist
 
 
+async def delete_artist(db: AsyncSession, artist_id: uuid.UUID) -> bool:
+    artist = await get_artist_by_id(db, artist_id)
+    if artist is None:
+        return False
+    await db.delete(artist)
+    await db.flush()
+    return True
+
+
 async def get_all_artist_domains(db: AsyncSession) -> list[str]:
     result = await db.execute(
         select(Artist.domain).where(Artist.is_active.is_(True))
