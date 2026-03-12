@@ -89,8 +89,28 @@ async def update_product(
     product = await get_product_by_id(db, product_id)
     if product is None:
         return None
-    for field, value in data.model_dump(exclude_unset=True).items():
+
+    update_data = data.model_dump(exclude_unset=True)
+    new_variants = update_data.pop("variants", None)
+
+    for field, value in update_data.items():
         setattr(product, field, value)
+
+    # Sync variants if provided: replace all existing variants
+    if new_variants is not None:
+        for old_variant in product.variants:
+            await db.delete(old_variant)
+        await db.flush()
+        for v_data in new_variants:
+            variant = ProductVariant(
+                product_id=product.id,
+                size=v_data["size"],
+                sku=v_data["sku"],
+                price=v_data["price"],
+                cost_price=v_data["cost_price"],
+            )
+            db.add(variant)
+
     await db.flush()
     await db.refresh(product)
     return await get_product_by_id(db, product.id)

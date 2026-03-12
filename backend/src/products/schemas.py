@@ -55,6 +55,7 @@ class ProductUpdate(BaseModel):
     gallery_urls: list[str] | None = None
     print_file_key: str | None = Field(default=None, max_length=500)
     is_active: bool | None = None
+    variants: list[VariantCreate] | None = None
 
 
 class ProductResponse(ProductBase):

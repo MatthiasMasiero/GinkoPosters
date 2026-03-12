@@ -101,20 +101,24 @@ export function ProductForm({ product }: ProductFormProps) {
       return;
     }
 
-    if (!isEdit && variants.length === 0) {
+    if (variants.length === 0) {
       setError("At least one variant is required.");
       return;
     }
 
-    if (
-      !isEdit &&
-      variants.some((v) => !v.sku || !v.price || !v.cost_price)
-    ) {
+    if (variants.some((v) => !v.sku || !v.price || !v.cost_price)) {
       setError("All variant fields (SKU, price, cost price) are required.");
       return;
     }
 
     setSubmitting(true);
+
+    const parsedVariants = variants.map((v) => ({
+      size: v.size,
+      sku: v.sku,
+      price: parseFloat(v.price),
+      cost_price: parseFloat(v.cost_price),
+    }));
 
     try {
       if (isEdit) {
@@ -125,6 +129,7 @@ export function ProductForm({ product }: ProductFormProps) {
           image_url: imageUrl || null,
           gallery_urls: galleryUrls,
           is_active: isActive,
+          variants: parsedVariants,
         });
       } else {
         await api.admin.products.create({
@@ -134,12 +139,7 @@ export function ProductForm({ product }: ProductFormProps) {
           description: description || null,
           image_url: imageUrl || null,
           gallery_urls: galleryUrls,
-          variants: variants.map((v) => ({
-            size: v.size,
-            sku: v.sku,
-            price: parseFloat(v.price),
-            cost_price: parseFloat(v.cost_price),
-          })),
+          variants: parsedVariants,
         });
       }
       router.push("/admin/products");
@@ -250,13 +250,11 @@ export function ProductForm({ product }: ProductFormProps) {
       {/* Variants */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>Variants {!isEdit && "*"}</Label>
-          {!isEdit && (
-            <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-              <Plus className="mr-1 h-3 w-3" />
-              Add Variant
-            </Button>
-          )}
+          <Label>Variants *</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+            <Plus className="mr-1 h-3 w-3" />
+            Add Variant
+          </Button>
         </div>
 
         {variants.map((variant, index) => (
@@ -269,7 +267,6 @@ export function ProductForm({ product }: ProductFormProps) {
               <Select
                 value={variant.size}
                 onValueChange={(val) => updateVariant(index, "size", val)}
-                disabled={isEdit}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -289,7 +286,6 @@ export function ProductForm({ product }: ProductFormProps) {
                 value={variant.sku}
                 onChange={(e) => updateVariant(index, "sku", e.target.value)}
                 className="mt-1"
-                disabled={isEdit}
               />
             </div>
             <div className="w-28">
@@ -301,7 +297,6 @@ export function ProductForm({ product }: ProductFormProps) {
                 value={variant.price}
                 onChange={(e) => updateVariant(index, "price", e.target.value)}
                 className="mt-1"
-                disabled={isEdit}
               />
             </div>
             <div className="w-28">
@@ -315,10 +310,9 @@ export function ProductForm({ product }: ProductFormProps) {
                   updateVariant(index, "cost_price", e.target.value)
                 }
                 className="mt-1"
-                disabled={isEdit}
               />
             </div>
-            {!isEdit && variants.length > 1 && (
+            {variants.length > 1 && (
               <Button
                 type="button"
                 variant="ghost"

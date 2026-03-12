@@ -201,6 +201,7 @@ export const api = {
           gallery_urls?: string[];
           print_file_key?: string | null;
           is_active?: boolean;
+          variants?: { size: string; sku: string; price: number; cost_price: number }[];
         }
       ) =>
         fetchAPI<Product>(`/api/v1/admin/products/${id}`, {
