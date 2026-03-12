@@ -72,6 +72,17 @@ async def create_product(db: AsyncSession, data: ProductCreate) -> Product:
     return await get_product_by_id(db, product.id)  # type: ignore[return-value]
 
 
+async def delete_product(db: AsyncSession, product_id: uuid.UUID) -> bool:
+    product = await get_product_by_id(db, product_id)
+    if product is None:
+        return False
+    for variant in product.variants:
+        await db.delete(variant)
+    await db.delete(product)
+    await db.flush()
+    return True
+
+
 async def update_product(
     db: AsyncSession, product_id: uuid.UUID, data: ProductUpdate
 ) -> Product | None:

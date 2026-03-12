@@ -208,6 +208,11 @@ export const api = {
           headers: authHeaders(),
           body: JSON.stringify(data),
         }),
+      delete: (id: string) =>
+        fetchAPI<void>(`/api/v1/admin/products/${id}`, {
+          method: "DELETE",
+          headers: authHeaders(),
+        }),
     },
 
     uploads: {

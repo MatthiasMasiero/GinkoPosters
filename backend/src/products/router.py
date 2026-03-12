@@ -14,6 +14,7 @@ from src.products.schemas import (
 )
 from src.products.service import (
     create_product,
+    delete_product,
     get_product_by_id,
     list_all_products,
     list_products_by_artist,
@@ -92,3 +93,17 @@ async def admin_update_product(
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product
+
+
+@router.delete(
+    "/api/v1/admin/products/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def admin_delete_product(
+    product_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    deleted = await delete_product(db, product_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")

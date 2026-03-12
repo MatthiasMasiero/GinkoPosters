@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +24,14 @@ import {
 import type { Artist, Product } from "@/lib/types";
 
 export default function AdminProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [artistFilter, setArtistFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deleteConfirmStep, setDeleteConfirmStep] = useState(0);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     api.admin.artists
@@ -50,6 +55,34 @@ export default function AdminProductsPage() {
     return artists.find((a) => a.id === artistId)?.name || "Unknown";
   }
 
+  function startDelete(product: Product) {
+    setDeleteTarget(product);
+    setDeleteConfirmStep(1);
+  }
+
+  function cancelDelete() {
+    setDeleteTarget(null);
+    setDeleteConfirmStep(0);
+  }
+
+  async function confirmDelete() {
+    if (deleteConfirmStep === 1) {
+      setDeleteConfirmStep(2);
+      return;
+    }
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.admin.products.delete(deleteTarget.id);
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      cancelDelete();
+    } catch {
+      cancelDelete();
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -58,6 +91,49 @@ export default function AdminProductsPage() {
           <Button>Create Product</Button>
         </Link>
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
+            {deleteConfirmStep === 1 ? (
+              <>
+                <h2 className="text-lg font-semibold">Delete Product</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Are you sure you want to delete <strong>{deleteTarget.title}</strong>? This will
+                  remove all variants and order history for this product.
+                </p>
+                <div className="mt-6 flex justify-end gap-3">
+                  <Button variant="outline" onClick={cancelDelete}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={confirmDelete}>
+                    Yes, delete
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold text-destructive">
+                  Final Confirmation
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  This action is <strong>permanent and cannot be undone</strong>. All data for{" "}
+                  <strong>{deleteTarget.title}</strong> will be permanently deleted.
+                </p>
+                <div className="mt-6 flex justify-end gap-3">
+                  <Button variant="outline" onClick={cancelDelete}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={confirmDelete} disabled={deleting}>
+                    {deleting ? "Deleting..." : "I understand, delete permanently"}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-4">
         <Select value={artistFilter} onValueChange={setArtistFilter}>
@@ -89,13 +165,14 @@ export default function AdminProductsPage() {
                 <TableHead>Artist</TableHead>
                 <TableHead>Variants</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {products.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6}
                     className="py-8 text-center text-muted-foreground"
                   >
                     No products found.
@@ -135,6 +212,24 @@ export default function AdminProductsPage() {
                       >
                         {product.is_active ? "Active" : "Inactive"}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => router.push(`/admin/products/${product.id}`)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => startDelete(product)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
