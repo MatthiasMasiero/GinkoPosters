@@ -122,12 +122,28 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
     }
   }, [initialGrid, grid.length]);
 
-  // Cycle: pick a random cell every FLIP_INTERVAL and assign it a new image
+  // Shuffle bag: visit every cell in random order before repeating
+  const remainingCells = useRef<number[]>([]);
+
+  function pickNextCell(): number {
+    if (remainingCells.current.length === 0) {
+      // Refill and shuffle
+      const indices = Array.from({ length: CELL_COUNT }, (_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      remainingCells.current = indices;
+    }
+    return remainingCells.current.pop()!;
+  }
+
+  // Cycle: pick next cell from shuffle bag every FLIP_INTERVAL
   useEffect(() => {
     if (allImages.length === 0 || initialGrid.length === 0) return;
 
     const interval = setInterval(() => {
-      const cellIndex = Math.floor(Math.random() * CELL_COUNT);
+      const cellIndex = pickNextCell();
       const newImage = pickRandom(allImagesRef.current);
 
       setIncoming((prev) => {
