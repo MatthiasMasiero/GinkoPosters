@@ -16,7 +16,7 @@ interface MosaicImage {
 }
 
 const CELL_COUNT = 6;
-const FLIP_INTERVAL = 3000;
+const FLIP_INTERVAL = 2200;
 const TRANSITION_MS = 1500;
 
 function getAllImages(products: Product[]): MosaicImage[] {
