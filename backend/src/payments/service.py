@@ -64,8 +64,8 @@ async def create_checkout_session(
         payment_method_types=["card"],
         line_items=line_items,
         mode="payment",
-        success_url=f"{settings.FRONTEND_URL}/order-confirmation?order_id={order.id}",
-        cancel_url=f"{settings.FRONTEND_URL}/checkout?order_id={order.id}&cancelled=true",
+        success_url=f"{settings.FRONTEND_URL}/storefront/order-confirmation?order_id={order.id}",
+        cancel_url=f"{settings.FRONTEND_URL}/storefront/checkout?order_id={order.id}&cancelled=true",
         customer_email=order.customer_email,
         metadata={"order_id": str(order.id)},
     )
