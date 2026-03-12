@@ -203,12 +203,6 @@ export default function ProductDetailPage() {
               <h1 className="text-3xl font-extrabold uppercase tracking-tight">
                 {product.title}
               </h1>
-
-              {selectedVariant && (
-                <p className="mt-2 text-xl">
-                  {formatCurrency(selectedVariant.price)}
-                </p>
-              )}
             </FadeIn>
 
             {/* Size selector */}
