@@ -27,7 +27,7 @@ router = APIRouter(tags=["artists"])
 
 
 # Public endpoints
-@router.get("/api/v1/artists/", response_model=list[ArtistPublicResponse])
+@router.get("/api/v1/artists", response_model=list[ArtistPublicResponse])
 async def get_active_artists(
     pagination: tuple[int, int] = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),

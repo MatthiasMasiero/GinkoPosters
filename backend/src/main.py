@@ -96,7 +96,10 @@ async def audit_log(request: Request, call_next):
 async def security_middleware(request: Request, call_next):
     origin = request.headers.get("origin")
     allowed = getattr(request.app.state, "allowed_origins", ["http://localhost:3000"])
-    is_allowed_origin = origin and origin in allowed
+    is_allowed_origin = origin and (
+        origin in allowed
+        or (origin and ".vercel.app" in origin)
+    )
 
     # Handle preflight OPTIONS requests
     if request.method == "OPTIONS" and is_allowed_origin:
