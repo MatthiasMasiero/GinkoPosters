@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { FadeIn } from "@/components/landing/fade-in";
 import type { Artist, Product } from "@/lib/types";
@@ -17,6 +17,7 @@ interface MosaicImage {
 
 const CELL_COUNT = 6;
 const FLIP_INTERVAL = 3500; // ms between flips
+const CROSSFADE_DURATION = 1800; // ms
 
 function getAllImages(products: Product[]): MosaicImage[] {
   return products
@@ -51,25 +52,27 @@ function MosaicCell({
 }) {
   return (
     <div className={`relative overflow-hidden ${className ?? ""}`}>
-      {/* Current image (fades out when flipping) */}
+      {/* Current image — always visible as base layer */}
       <Image
         src={current.src}
         alt={current.alt}
         fill
         priority={priority}
         sizes={sizes}
-        className="object-cover transition-opacity duration-[1800ms] ease-in-out"
-        style={{ opacity: flipping ? 0 : 1 }}
+        className="object-cover"
       />
-      {/* Next image (fades in when flipping) */}
+      {/* Next image — fades in on top, then becomes the new current */}
       {next && (
         <Image
           src={next.src}
           alt={next.alt}
           fill
           sizes={sizes}
-          className="object-cover transition-opacity duration-[1800ms] ease-in-out"
-          style={{ opacity: flipping ? 1 : 0 }}
+          className="absolute inset-0 object-cover transition-opacity ease-in-out"
+          style={{
+            opacity: flipping ? 1 : 0,
+            transitionDuration: `${CROSSFADE_DURATION}ms`,
+          }}
         />
       )}
     </div>
@@ -84,7 +87,13 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
   const [nextImages, setNextImages] = useState<(MosaicImage | null)[]>(
     () => new Array(CELL_COUNT).fill(null)
   );
-  const [flippingCell, setFlippingCell] = useState<number | null>(null);
+  const [flippingCells, setFlippingCells] = useState<Set<number>>(new Set());
+
+  // Refs so the interval callback always reads the latest values
+  const gridRef = useRef(grid);
+  gridRef.current = grid;
+  const allImagesRef = useRef(allImages);
+  allImagesRef.current = allImages;
 
   // Keep grid in sync if products load after mount
   useEffect(() => {
@@ -95,23 +104,24 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
 
   const pickRandomImage = useCallback(
     (excludeSrcs: string[]): MosaicImage | null => {
-      if (allImages.length <= 1) return null;
-      const candidates = allImages.filter(
+      const images = allImagesRef.current;
+      if (images.length <= 1) return null;
+      const candidates = images.filter(
         (img) => !excludeSrcs.includes(img.src)
       );
       if (candidates.length === 0) return null;
       return candidates[Math.floor(Math.random() * candidates.length)];
     },
-    [allImages]
+    []
   );
 
   useEffect(() => {
-    if (allImages.length <= 1 || grid.length === 0) return;
+    if (allImages.length <= 1 || initialGrid.length === 0) return;
 
     const interval = setInterval(() => {
       // Pick a random cell to flip
       const cellIndex = Math.floor(Math.random() * CELL_COUNT);
-      const currentSrcs = grid.map((g) => g.src);
+      const currentSrcs = gridRef.current.map((g) => g.src);
       const newImage = pickRandomImage(currentSrcs);
       if (!newImage) return;
 
@@ -121,7 +131,14 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
         copy[cellIndex] = newImage;
         return copy;
       });
-      setFlippingCell(cellIndex);
+      setFlippingCells((prev) => new Set(prev).add(cellIndex));
+
+      // Small delay to ensure the next image renders at opacity 0 before transitioning
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setFlippingCells((prev) => new Set(prev).add(cellIndex));
+        });
+      });
 
       // After the crossfade completes, swap current with next
       setTimeout(() => {
@@ -135,12 +152,16 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
           copy[cellIndex] = null;
           return copy;
         });
-        setFlippingCell(null);
-      }, 1800);
+        setFlippingCells((prev) => {
+          const next = new Set(prev);
+          next.delete(cellIndex);
+          return next;
+        });
+      }, CROSSFADE_DURATION + 100);
     }, FLIP_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [allImages, grid, pickRandomImage]);
+  }, [allImages.length, initialGrid.length, pickRandomImage]);
 
   const hasImages = grid.length > 0;
 
@@ -156,7 +177,7 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
                 key={`d-${i}`}
                 current={img}
                 next={nextImages[i]}
-                flipping={flippingCell === i}
+                flipping={flippingCells.has(i)}
                 priority={i < 3}
                 sizes="33vw"
                 className={i === 0 ? "row-span-2" : ""}
@@ -171,7 +192,7 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
                 key={`m-${i}`}
                 current={img}
                 next={nextImages[i]}
-                flipping={flippingCell === i}
+                flipping={flippingCells.has(i)}
                 priority={i < 2}
                 sizes="50vw"
               />
