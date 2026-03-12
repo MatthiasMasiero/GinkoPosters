@@ -68,7 +68,7 @@ export default function LandingPage() {
       <HeroSection posters={posterImages} />
 
       {/* The Collection */}
-      <section id="collection" className="px-6 py-24 md:px-16 md:py-32">
+      <section id="collection" className="px-8 py-24 md:px-16 md:py-32 lg:px-20">
         <FadeIn>
           <h2 className="mb-20 text-center text-xs font-extrabold uppercase tracking-[0.2em] text-muted-foreground md:text-sm">
             The Collection
@@ -166,7 +166,7 @@ export default function LandingPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="px-6 py-10 text-center md:py-12">
+      <section className="px-8 py-14 text-center md:px-16 md:py-16">
         <FadeIn>
           <p className="mx-auto max-w-lg text-lg text-muted-foreground md:text-xl">
             Every print is produced on demand with premium materials and

@@ -36,7 +36,7 @@ export function HeroSection({ posters = [] }: HeroSectionProps) {
         </div>
 
         {/* Content right */}
-        <div className="flex flex-col justify-center px-10 py-24 lg:px-20">
+        <div className="flex flex-col justify-center px-10 py-24 lg:px-20 xl:px-28 overflow-hidden">
           <FadeIn delay={100}>
             <p className="label-uppercase text-muted-foreground">
               Curated Art Prints
@@ -81,7 +81,7 @@ export function HeroSection({ posters = [] }: HeroSectionProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
-        <div className="relative z-10 px-6 pb-20 pt-32 text-white">
+        <div className="relative z-10 px-8 pb-24 pt-32 text-white">
           <FadeIn delay={100}>
             <p className="label-uppercase text-white/60">Curated Art Prints</p>
           </FadeIn>
