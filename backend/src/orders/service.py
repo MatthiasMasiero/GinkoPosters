@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -9,6 +9,8 @@ from src.config import settings
 from src.orders.models import Order, OrderItem
 from src.orders.schemas import VALID_ORDER_STATUSES, OrderCreate
 from src.products.models import Product, ProductVariant
+
+STALE_ORDER_MINUTES = 30
 
 
 def _generate_order_number() -> str:
@@ -159,3 +161,14 @@ async def get_order_by_stripe_session(
         .where(Order.stripe_session_id == session_id)
     )
     return result.scalar_one_or_none()
+
+
+async def cancel_stale_pending_orders(db: AsyncSession) -> int:
+    """Cancel orders stuck in pending_payment for longer than STALE_ORDER_MINUTES."""
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=STALE_ORDER_MINUTES)
+    result = await db.execute(
+        update(Order)
+        .where(Order.status == "pending_payment", Order.created_at < cutoff)
+        .values(status="cancelled", notes="Auto-cancelled: payment not completed within 30 minutes")
+    )
+    return result.rowcount

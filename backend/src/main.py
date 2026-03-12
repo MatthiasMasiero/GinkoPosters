@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -62,8 +63,26 @@ async def lifespan(app: FastAPI):
             "http://localhost:3000",
         ]
 
+    # Background task: cancel stale pending orders every 10 minutes
+    async def _cleanup_stale_orders():
+        from src.orders.service import cancel_stale_pending_orders
+
+        while True:
+            await asyncio.sleep(600)  # 10 minutes
+            try:
+                async with async_session_factory() as session:
+                    cancelled = await cancel_stale_pending_orders(session)
+                    await session.commit()
+                    if cancelled:
+                        logger.info("Auto-cancelled %d stale pending orders", cancelled)
+            except Exception as e:
+                logger.error("Stale order cleanup failed: %s", e)
+
+    cleanup_task = asyncio.create_task(_cleanup_stale_orders())
+
     yield
 
+    cleanup_task.cancel()
     await engine.dispose()
 
 
