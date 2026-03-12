@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Upload, X, Loader2, GripVertical } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -53,24 +53,29 @@ function compressImage(file: File): Promise<File> {
 }
 
 export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
-  const [uploading, setUploading] = useState(false);
+  const [uploadingCount, setUploadingCount] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Drag-to-reorder state
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
+
+  // Keep a ref to urls so concurrent uploads always append to the latest list
+  const urlsRef = useRef(urls);
+  urlsRef.current = urls;
+
   const uploadFile = useCallback(
-    async (file: File) => {
+    async (file: File): Promise<string | null> => {
       if (!ACCEPTED_TYPES.includes(file.type)) {
         setError("Only JPEG, PNG, and WebP images are allowed.");
-        return;
+        return null;
       }
-      setError(null);
-      setUploading(true);
       try {
         const processed = await compressImage(file);
         if (processed.size > MAX_SIZE) {
           setError("Image still too large after compression.");
-          setUploading(false);
-          return;
+          return null;
         }
         const timestamp = Date.now();
         const safeName = processed.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -82,26 +87,41 @@ export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
           body: processed,
         });
         if (!uploadRes.ok) throw new Error("Upload to S3 failed");
-        onChange([...urls, public_url]);
+        return public_url;
       } catch (err) {
         setError(err instanceof Error ? err.message : "Upload failed");
-      } finally {
-        setUploading(false);
+        return null;
       }
     },
-    [folder, urls, onChange]
+    [folder]
+  );
+
+  const uploadFiles = useCallback(
+    async (files: File[]) => {
+      setError(null);
+      setUploadingCount(files.length);
+
+      const results = await Promise.all(files.map((f) => uploadFile(f)));
+      const uploaded = results.filter((url): url is string => url !== null);
+
+      if (uploaded.length > 0) {
+        onChange([...urlsRef.current, ...uploaded]);
+      }
+      setUploadingCount(0);
+    },
+    [uploadFile, onChange]
   );
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(false);
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) uploadFile(files[0]);
+    const files = Array.from(e.dataTransfer.files).filter((f) => ACCEPTED_TYPES.includes(f.type));
+    if (files.length > 0) uploadFiles(files);
   }
 
   function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) uploadFile(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) uploadFiles(files);
     e.target.value = "";
   }
 
@@ -109,13 +129,44 @@ export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
     onChange(urls.filter((_, i) => i !== index));
   }
 
-  function moveImage(from: number, to: number) {
-    if (to < 0 || to >= urls.length) return;
-    const newUrls = [...urls];
-    const [moved] = newUrls.splice(from, 1);
-    newUrls.splice(to, 0, moved);
-    onChange(newUrls);
+  // Drag-to-reorder handlers
+  function handleReorderDragStart(e: React.DragEvent, index: number) {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    // Use a transparent image so the default ghost isn't distracting
+    const ghost = document.createElement("div");
+    ghost.style.opacity = "0";
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, 0, 0);
+    requestAnimationFrame(() => ghost.remove());
   }
+
+  function handleReorderDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragIndex !== null && index !== dragIndex) {
+      setDropIndex(index);
+    }
+  }
+
+  function handleReorderDrop(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    if (dragIndex !== null && dragIndex !== index) {
+      const newUrls = [...urls];
+      const [moved] = newUrls.splice(dragIndex, 1);
+      newUrls.splice(index, 0, moved);
+      onChange(newUrls);
+    }
+    setDragIndex(null);
+    setDropIndex(null);
+  }
+
+  function handleReorderDragEnd() {
+    setDragIndex(null);
+    setDropIndex(null);
+  }
+
+  const uploading = uploadingCount > 0;
 
   return (
     <div className="space-y-3">
@@ -123,7 +174,19 @@ export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
       {urls.length > 0 && (
         <div className="flex flex-wrap gap-3">
           {urls.map((url, i) => (
-            <div key={url} className="group relative">
+            <div
+              key={url}
+              draggable
+              onDragStart={(e) => handleReorderDragStart(e, i)}
+              onDragOver={(e) => handleReorderDragOver(e, i)}
+              onDrop={(e) => handleReorderDrop(e, i)}
+              onDragEnd={handleReorderDragEnd}
+              className={cn(
+                "group relative cursor-grab active:cursor-grabbing transition-all duration-150",
+                dragIndex === i && "opacity-40 scale-95",
+                dropIndex === i && dragIndex !== null && "ring-2 ring-primary ring-offset-2 rounded-md"
+              )}
+            >
               <img
                 src={url}
                 alt={`Gallery image ${i + 1}`}
@@ -136,28 +199,9 @@ export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
               >
                 <X className="h-3 w-3" />
               </button>
-              {urls.length > 1 && (
-                <div className="absolute -left-1 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {i > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => moveImage(i, i - 1)}
-                      className="rounded bg-background/80 px-1 py-0.5 text-[10px] font-bold shadow backdrop-blur-sm hover:bg-background"
-                    >
-                      ‹
-                    </button>
-                  )}
-                  {i < urls.length - 1 && (
-                    <button
-                      type="button"
-                      onClick={() => moveImage(i, i + 1)}
-                      className="rounded bg-background/80 px-1 py-0.5 text-[10px] font-bold shadow backdrop-blur-sm hover:bg-background"
-                    >
-                      ›
-                    </button>
-                  )}
-                </div>
-              )}
+              <div className="absolute left-1 top-1 rounded bg-background/80 p-0.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                <GripVertical className="h-3.5 w-3.5" />
+              </div>
               <span className="absolute bottom-1 right-1 rounded bg-background/80 px-1.5 py-0.5 text-[10px] font-medium backdrop-blur-sm">
                 {i + 1}
               </span>
@@ -166,7 +210,7 @@ export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
         </div>
       )}
 
-      {/* Add image button */}
+      {/* Add image(s) button */}
       <label
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -178,16 +222,20 @@ export function GalleryUpload({ urls, onChange, folder }: GalleryUploadProps) {
         )}
       >
         {uploading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <span className="mt-1 text-[10px] text-muted-foreground">{uploadingCount} file{uploadingCount > 1 ? "s" : ""}…</span>
+          </div>
         ) : (
           <>
             <Upload className="h-5 w-5 text-muted-foreground" />
-            <span className="mt-1 text-[10px] text-muted-foreground">Add image</span>
+            <span className="mt-1 text-[10px] text-muted-foreground">Add images</span>
           </>
         )}
         <input
           type="file"
           accept={ACCEPTED_TYPES.join(",")}
+          multiple
           onChange={handleFileInput}
           className="hidden"
           disabled={uploading}
