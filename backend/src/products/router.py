@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import require_admin
@@ -79,7 +80,15 @@ async def admin_create_product(
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    return await create_product(db, body)
+    try:
+        return await create_product(db, body)
+    except IntegrityError as e:
+        if "uq_product_variants_sku" in str(e) or "product_variants_sku_key" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A variant with one of these SKUs already exists. Use unique SKUs.",
+            )
+        raise
 
 
 @router.put("/api/v1/admin/products/{product_id}", response_model=ProductResponse)
@@ -89,7 +98,15 @@ async def admin_update_product(
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    product = await update_product(db, product_id, body)
+    try:
+        product = await update_product(db, product_id, body)
+    except IntegrityError as e:
+        if "uq_product_variants_sku" in str(e) or "product_variants_sku_key" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A variant with one of these SKUs already exists. Use unique SKUs.",
+            )
+        raise
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product

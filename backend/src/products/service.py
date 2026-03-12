@@ -51,6 +51,7 @@ async def create_product(db: AsyncSession, data: ProductCreate) -> Product:
         slug=data.slug,
         description=data.description,
         image_url=data.image_url,
+        gallery_urls=data.gallery_urls,
         print_file_key=data.print_file_key,
     )
     db.add(product)
@@ -68,7 +69,6 @@ async def create_product(db: AsyncSession, data: ProductCreate) -> Product:
 
     await db.flush()
     await db.refresh(product)
-    # Reload with variants
     return await get_product_by_id(db, product.id)  # type: ignore[return-value]
 
 
