@@ -3,7 +3,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Minus, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  Minus,
+  Plus,
+  RefreshCw,
+  Truck,
+  Package,
+  ChevronDown,
+} from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useCart } from "@/hooks/use-cart";
 import { useArtist } from "@/hooks/use-artist";
@@ -13,6 +21,8 @@ import { SizeSelector } from "@/components/storefront/size-selector";
 import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { SHIPPING_COST } from "@/lib/constants";
 
 function getGalleryImages(product: Product): { src: string; alt: string }[] {
   const images: { src: string; alt: string }[] = [];
@@ -33,6 +43,62 @@ function getGalleryImages(product: Product): { src: string; alt: string }[] {
   return images;
 }
 
+function ProductDetails({ description }: { description: string | null }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-8 border-t border-border pt-6">
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <RefreshCw className="h-4 w-4 shrink-0 text-foreground" />
+          <span className="text-xs font-bold uppercase tracking-[0.06em]">
+            Exchange for free within 30 days
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Truck className="h-4 w-4 shrink-0 text-foreground" />
+          <span className="text-xs font-bold uppercase tracking-[0.06em]">
+            Delivered within 5–10 business days
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Package className="h-4 w-4 shrink-0 text-foreground" />
+          <span className="text-xs font-bold uppercase tracking-[0.06em]">
+            Free shipping on orders over {formatCurrency(170)}
+          </span>
+        </div>
+      </div>
+
+      {description && (
+        <div className="mt-5">
+          <button
+            onClick={() => setOpen(!open)}
+            className="flex items-center gap-1 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            See details
+            <ChevronDown
+              className={cn(
+                "h-3.5 w-3.5 transition-transform duration-200",
+                open && "rotate-180"
+              )}
+            />
+          </button>
+          <div
+            className={cn(
+              "overflow-hidden transition-all duration-300 ease-out",
+              open ? "mt-3 max-h-96 opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const { addItem, items } = useCart();
@@ -45,7 +111,6 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
 
-  // Check if user already has an item from this product's artist
   const hasArtistItemInCart = product
     ? items.some((item) => item.product.artist_id === product.artist_id)
     : false;
@@ -98,33 +163,42 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="page-enter px-6 py-12 md:px-12">
-      <div className="mx-auto max-w-5xl">
-        <Link
-          href={backHref}
-          className="mb-8 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
-        >
-          <ArrowLeft className="h-3 w-3" />
-          Back to store
-        </Link>
+    <div className="page-enter">
+      {/* Back link */}
+      <div className="px-6 pt-8 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <Link
+            href={backHref}
+            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Back to store
+          </Link>
+        </div>
+      </div>
 
-        {hasArtistItemInCart && (
-          <div className="mb-8 border border-accent-red/20 bg-accent-red/5 px-4 py-3 text-sm">
+      {hasArtistItemInCart && (
+        <div className="mx-auto mt-6 max-w-7xl px-6 md:px-12">
+          <div className="border border-accent-red/20 bg-accent-red/5 px-4 py-3 text-sm">
             <span className="font-bold text-accent-red">15% off</span>
             <span className="ml-1 text-muted-foreground">
-              — you have another item from this artist in your cart. Add this one for a discount!
+              — you have another item from this artist in your cart. Add this
+              one for a discount!
             </span>
           </div>
-        )}
+        </div>
+      )}
 
-        <div className="grid gap-12 md:grid-cols-2">
-          {/* Product images */}
-          <FadeIn direction="left">
+      {/* Main layout: images left, info right (sticky) */}
+      <div className="mx-auto mt-8 max-w-7xl px-6 pb-16 md:px-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
+          {/* Left: scrollable stacked images */}
+          <FadeIn direction="up">
             <ImageGallery images={getGalleryImages(product)} />
           </FadeIn>
 
-          {/* Product info */}
-          <div className="flex flex-col">
+          {/* Right: sticky product info */}
+          <div className="lg:sticky lg:top-8 lg:self-start">
             <FadeIn direction="right" delay={100}>
               <h1 className="text-3xl font-extrabold uppercase tracking-tight">
                 {product.title}
@@ -137,16 +211,8 @@ export default function ProductDetailPage() {
               )}
             </FadeIn>
 
-            {product.description && (
-              <FadeIn direction="right" delay={200}>
-                <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-                  {product.description}
-                </p>
-              </FadeIn>
-            )}
-
             {/* Size selector */}
-            <FadeIn direction="right" delay={300}>
+            <FadeIn direction="right" delay={200}>
               <div className="mt-8">
                 <h3 className="mb-3 text-xs font-extrabold uppercase tracking-[0.08em]">
                   Size
@@ -160,7 +226,7 @@ export default function ProductDetailPage() {
             </FadeIn>
 
             {/* Quantity */}
-            <FadeIn direction="right" delay={400}>
+            <FadeIn direction="right" delay={300}>
               <div className="mt-8">
                 <h3 className="mb-3 text-xs font-extrabold uppercase tracking-[0.08em]">
                   Quantity
@@ -175,7 +241,9 @@ export default function ProductDetailPage() {
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-8 text-center font-medium">{quantity}</span>
+                  <span className="w-8 text-center font-medium">
+                    {quantity}
+                  </span>
                   <Button
                     variant="outline"
                     size="icon"
@@ -190,15 +258,20 @@ export default function ProductDetailPage() {
             </FadeIn>
 
             {/* Add to cart */}
-            <FadeIn direction="right" delay={500}>
+            <FadeIn direction="right" delay={400}>
               <Button
-                className="mt-10 w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em] md:w-auto md:px-12"
+                className="mt-10 w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]"
                 size="lg"
                 onClick={handleAddToCart}
                 disabled={!selectedVariant}
               >
                 {added ? "Added to Cart" : "Add to Cart"}
               </Button>
+            </FadeIn>
+
+            {/* Product details / shipping info */}
+            <FadeIn direction="right" delay={500}>
+              <ProductDetails description={product.description} />
             </FadeIn>
           </div>
         </div>
