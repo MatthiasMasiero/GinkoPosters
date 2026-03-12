@@ -16,8 +16,8 @@ interface MosaicImage {
 }
 
 const CELL_COUNT = 6;
-const FLIP_INTERVAL = 3500; // ms between flips
-const CROSSFADE_DURATION = 1800; // ms
+const FLIP_INTERVAL = 3000;
+const TRANSITION_MS = 1500;
 
 function getAllImages(products: Product[]): MosaicImage[] {
   return products
@@ -25,8 +25,8 @@ function getAllImages(products: Product[]): MosaicImage[] {
     .map((p) => ({ src: p.image_url!, alt: p.title }));
 }
 
-function pickRandom(images: MosaicImage[]): MosaicImage {
-  return images[Math.floor(Math.random() * images.length)];
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function getInitialGrid(images: MosaicImage[]): MosaicImage[] {
@@ -34,25 +34,50 @@ function getInitialGrid(images: MosaicImage[]): MosaicImage[] {
   return Array.from({ length: CELL_COUNT }, () => pickRandom(images));
 }
 
-/** A single mosaic cell that crossfades between two images */
+/**
+ * Self-contained mosaic cell. When `incoming` changes (non-null),
+ * it renders the new image at opacity 0, waits a frame, then
+ * transitions to opacity 1. After the transition, it calls onDone()
+ * so the parent can promote the incoming image to current.
+ */
 function MosaicCell({
   current,
-  next,
-  flipping,
+  incoming,
+  onDone,
   priority,
   sizes,
   className,
 }: {
   current: MosaicImage;
-  next: MosaicImage | null;
-  flipping: boolean;
+  incoming: MosaicImage | null;
+  onDone: () => void;
   priority: boolean;
   sizes: string;
   className?: string;
 }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (!incoming) {
+      setShow(false);
+      return;
+    }
+    // Phase 1: render at opacity 0 (this frame)
+    setShow(false);
+    // Phase 2: next frame, transition to opacity 1
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setShow(true));
+    });
+    // Phase 3: after transition, tell parent to promote
+    const timer = setTimeout(onDone, TRANSITION_MS + 150);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
+  }, [incoming?.src]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className={`relative overflow-hidden ${className ?? ""}`}>
-      {/* Current image — always visible as base layer */}
       <Image
         src={current.src}
         alt={current.alt}
@@ -61,17 +86,16 @@ function MosaicCell({
         sizes={sizes}
         className="object-cover"
       />
-      {/* Next image — fades in on top, then becomes the new current */}
-      {next && (
+      {incoming && (
         <Image
-          src={next.src}
-          alt={next.alt}
+          src={incoming.src}
+          alt={incoming.alt}
           fill
           sizes={sizes}
-          className="absolute inset-0 object-cover transition-opacity ease-in-out"
+          className="absolute inset-0 object-cover"
           style={{
-            opacity: flipping ? 1 : 0,
-            transitionDuration: `${CROSSFADE_DURATION}ms`,
+            opacity: show ? 1 : 0,
+            transition: `opacity ${TRANSITION_MS}ms ease-in-out`,
           }}
         />
       )}
@@ -84,14 +108,10 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
   const initialGrid = useMemo(() => getInitialGrid(allImages), [allImages]);
 
   const [grid, setGrid] = useState<MosaicImage[]>(initialGrid);
-  const [nextImages, setNextImages] = useState<(MosaicImage | null)[]>(
+  const [incoming, setIncoming] = useState<(MosaicImage | null)[]>(
     () => new Array(CELL_COUNT).fill(null)
   );
-  const [flippingCells, setFlippingCells] = useState<Set<number>>(new Set());
 
-  // Refs so the interval callback always reads the latest values
-  const gridRef = useRef(grid);
-  gridRef.current = grid;
   const allImagesRef = useRef(allImages);
   allImagesRef.current = allImages;
 
@@ -102,52 +122,38 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
     }
   }, [initialGrid, grid.length]);
 
+  // Cycle: pick a random cell every FLIP_INTERVAL and assign it a new image
   useEffect(() => {
     if (allImages.length === 0 || initialGrid.length === 0) return;
 
     const interval = setInterval(() => {
-      // Pick a random cell and a random image
       const cellIndex = Math.floor(Math.random() * CELL_COUNT);
-      const images = allImagesRef.current;
-      const newImage = pickRandom(images);
+      const newImage = pickRandom(allImagesRef.current);
 
-      // Set the next image and trigger the crossfade
-      setNextImages((prev) => {
+      setIncoming((prev) => {
         const copy = [...prev];
         copy[cellIndex] = newImage;
         return copy;
       });
-      setFlippingCells((prev) => new Set(prev).add(cellIndex));
-
-      // Small delay to ensure the next image renders at opacity 0 before transitioning
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setFlippingCells((prev) => new Set(prev).add(cellIndex));
-        });
-      });
-
-      // After the crossfade completes, swap current with next
-      setTimeout(() => {
-        setGrid((prev) => {
-          const copy = [...prev];
-          copy[cellIndex] = newImage;
-          return copy;
-        });
-        setNextImages((prev) => {
-          const copy = [...prev];
-          copy[cellIndex] = null;
-          return copy;
-        });
-        setFlippingCells((prev) => {
-          const next = new Set(prev);
-          next.delete(cellIndex);
-          return next;
-        });
-      }, CROSSFADE_DURATION + 100);
     }, FLIP_INTERVAL);
 
     return () => clearInterval(interval);
   }, [allImages.length, initialGrid.length]);
+
+  // Called by MosaicCell when its transition finishes
+  function promoteCel(cellIndex: number) {
+    setGrid((prev) => {
+      const copy = [...prev];
+      const img = incoming[cellIndex];
+      if (img) copy[cellIndex] = img;
+      return copy;
+    });
+    setIncoming((prev) => {
+      const copy = [...prev];
+      copy[cellIndex] = null;
+      return copy;
+    });
+  }
 
   const hasImages = grid.length > 0;
 
@@ -162,8 +168,8 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
               <MosaicCell
                 key={`d-${i}`}
                 current={img}
-                next={nextImages[i]}
-                flipping={flippingCells.has(i)}
+                incoming={incoming[i]}
+                onDone={() => promoteCel(i)}
                 priority={i < 3}
                 sizes="33vw"
                 className={i === 0 ? "row-span-2" : ""}
@@ -177,8 +183,8 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
               <MosaicCell
                 key={`m-${i}`}
                 current={img}
-                next={nextImages[i]}
-                flipping={flippingCells.has(i)}
+                incoming={incoming[i]}
+                onDone={() => promoteCel(i)}
                 priority={i < 2}
                 sizes="50vw"
               />
