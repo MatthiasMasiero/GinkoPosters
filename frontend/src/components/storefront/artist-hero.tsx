@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { FadeIn } from "@/components/landing/fade-in";
 import type { Artist, Product } from "@/lib/types";
@@ -25,13 +25,13 @@ function getAllImages(products: Product[]): MosaicImage[] {
     .map((p) => ({ src: p.image_url!, alt: p.title }));
 }
 
+function pickRandom(images: MosaicImage[]): MosaicImage {
+  return images[Math.floor(Math.random() * images.length)];
+}
+
 function getInitialGrid(images: MosaicImage[]): MosaicImage[] {
   if (images.length === 0) return [];
-  const filled = [...images];
-  while (filled.length < CELL_COUNT) {
-    filled.push(...images);
-  }
-  return filled.slice(0, CELL_COUNT);
+  return Array.from({ length: CELL_COUNT }, () => pickRandom(images));
 }
 
 /** A single mosaic cell that crossfades between two images */
@@ -102,28 +102,14 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
     }
   }, [initialGrid, grid.length]);
 
-  const pickRandomImage = useCallback(
-    (excludeSrcs: string[]): MosaicImage | null => {
-      const images = allImagesRef.current;
-      if (images.length <= 1) return null;
-      const candidates = images.filter(
-        (img) => !excludeSrcs.includes(img.src)
-      );
-      if (candidates.length === 0) return null;
-      return candidates[Math.floor(Math.random() * candidates.length)];
-    },
-    []
-  );
-
   useEffect(() => {
-    if (allImages.length <= 1 || initialGrid.length === 0) return;
+    if (allImages.length === 0 || initialGrid.length === 0) return;
 
     const interval = setInterval(() => {
-      // Pick a random cell to flip
+      // Pick a random cell and a random image
       const cellIndex = Math.floor(Math.random() * CELL_COUNT);
-      const currentSrcs = gridRef.current.map((g) => g.src);
-      const newImage = pickRandomImage(currentSrcs);
-      if (!newImage) return;
+      const images = allImagesRef.current;
+      const newImage = pickRandom(images);
 
       // Set the next image and trigger the crossfade
       setNextImages((prev) => {
@@ -161,7 +147,7 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
     }, FLIP_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [allImages.length, initialGrid.length, pickRandomImage]);
+  }, [allImages.length, initialGrid.length]);
 
   const hasImages = grid.length > 0;
 
