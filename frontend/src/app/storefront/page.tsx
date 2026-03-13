@@ -27,8 +27,18 @@ export default function StorefrontHomePage() {
 
   return (
     <>
-      {/* Artist hero with product mosaic */}
-      {artist && <ArtistHero artist={artist} products={products} />}
+      {/* Artist hero */}
+      {artist && (
+        <ArtistHero
+          artist={artist}
+          products={products}
+          heroImageUrl={
+            artist.slug === "madebygray"
+              ? "/images/made-by-gray-hero.png"
+              : undefined
+          }
+        />
+      )}
 
       {/* The Collection */}
       <section id="collection" className="px-8 py-24 md:px-16 md:py-32 lg:px-20">

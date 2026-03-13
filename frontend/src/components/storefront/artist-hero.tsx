@@ -8,6 +8,7 @@ import type { Artist, Product } from "@/lib/types";
 interface ArtistHeroProps {
   artist: Artist;
   products: Product[];
+  heroImageUrl?: string;
 }
 
 interface MosaicImage {
@@ -103,7 +104,7 @@ function MosaicCell({
   );
 }
 
-export function ArtistHero({ artist, products }: ArtistHeroProps) {
+export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) {
   const allImages = useMemo(() => getAllImages(products), [products]);
   const initialGrid = useMemo(() => getInitialGrid(allImages), [allImages]);
 
@@ -175,8 +176,19 @@ export function ArtistHero({ artist, products }: ArtistHeroProps) {
 
   return (
     <section className="relative min-h-screen overflow-hidden">
-      {/* Mosaic background */}
-      {hasImages ? (
+      {/* Background */}
+      {heroImageUrl ? (
+        <div className="absolute inset-0">
+          <Image
+            src={heroImageUrl}
+            alt={artist.name}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+      ) : hasImages ? (
         <div className="absolute inset-0">
           {/* Desktop mosaic: asymmetric editorial grid */}
           <div className="hidden h-full md:grid md:grid-cols-3 md:grid-rows-2">
