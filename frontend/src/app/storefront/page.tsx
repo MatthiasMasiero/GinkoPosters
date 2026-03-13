@@ -34,7 +34,7 @@ export default function StorefrontHomePage() {
           products={products}
           heroImageUrl={
             artist.slug === "madebygray"
-              ? "/images/made-by-gray-hero.png"
+              ? "/images/made-by-gray-hero.jpg"
               : undefined
           }
         />
