@@ -133,7 +133,7 @@ export default function LandingPage() {
                   {/* Poster grid */}
                   <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
                     {products.map((product, productIndex) => (
-                      <FadeIn key={product.id} delay={productIndex * 100}>
+                      <FadeIn key={product.id} delay={Math.min(productIndex * 100, 800)}>
                         <PosterCard
                           product={product}
                           artistSlug={artist.slug}
@@ -164,7 +164,7 @@ export default function LandingPage() {
             </FadeIn>
             <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
               {FALLBACK_POSTERS.map((poster, i) => (
-                <FadeIn key={poster.src} delay={i * 100}>
+                <FadeIn key={poster.src} delay={Math.min(i * 100, 800)}>
                   <div className="group">
                     <a href="/storefront?artist=madebygray" className="block">
                       <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted transition-shadow duration-500 group-hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.15)]">

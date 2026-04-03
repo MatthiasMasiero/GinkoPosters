@@ -233,3 +233,33 @@ export function formatRegionalCurrency(amount: number, region: Region): string {
 export function getRegionConfig(region: Region): RegionConfig {
   return REGIONAL_PRICING[region];
 }
+
+export function getRegionalShipping(region: Region): number {
+  const shipping: Record<Region, number> = {
+    UK: 5.99,
+    DE: 6.99,
+    FR_ES: 6.99,
+    EU_WEST: 6.99,
+    EU_EAST: 6.99,
+    US: 7.99,
+    CA: 10.99,
+    AU: 11.99,
+    WORLD: 7.99,
+  };
+  return shipping[region];
+}
+
+export function getRegionalFreeShippingThreshold(region: Region): number {
+  const thresholds: Record<Region, number> = {
+    UK: 170,
+    DE: 199,
+    FR_ES: 199,
+    EU_WEST: 199,
+    EU_EAST: 199,
+    US: 199,
+    CA: 249,
+    AU: 299,
+    WORLD: 199,
+  };
+  return thresholds[region];
+}

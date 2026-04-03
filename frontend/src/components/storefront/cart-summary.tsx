@@ -1,6 +1,6 @@
 "use client";
 
-import { SHIPPING_COST } from "@/lib/constants";
+import { getRegionalShipping, getRegionalFreeShippingThreshold } from "@/lib/regional-pricing";
 import { useRegion } from "@/hooks/use-region";
 import { Separator } from "@/components/ui/separator";
 
@@ -12,8 +12,11 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount }: CartSummaryProps) {
-  const { formatPrice } = useRegion();
-  const shipping = itemCount > 0 ? SHIPPING_COST : 0;
+  const { formatPrice, region } = useRegion();
+  const shippingCost = getRegionalShipping(region);
+  const threshold = getRegionalFreeShippingThreshold(region);
+  const isFreeShipping = discountedSubtotal >= threshold;
+  const shipping = itemCount > 0 ? (isFreeShipping ? 0 : shippingCost) : 0;
   const total = discountedSubtotal + shipping;
 
   return (
@@ -35,8 +38,13 @@ export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount 
         )}
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Shipping</span>
-          <span>{itemCount > 0 ? formatPrice(shipping) : "--"}</span>
+          <span>{itemCount > 0 ? (isFreeShipping ? "Free" : formatPrice(shipping)) : "--"}</span>
         </div>
+        {itemCount > 0 && !isFreeShipping && (
+          <p className="text-xs text-muted-foreground">
+            Free shipping on orders over {formatPrice(threshold)}
+          </p>
+        )}
       </div>
       <Separator className="my-4" />
       <div className="flex justify-between font-medium">

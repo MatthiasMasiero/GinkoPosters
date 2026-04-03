@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useRegion } from "@/hooks/use-region";
-import { SHIPPING_COST } from "@/lib/constants";
+import { getRegionalFreeShippingThreshold } from "@/lib/regional-pricing";
 
 function getGalleryImages(product: Product): { src: string; alt: string }[] {
   const images: { src: string; alt: string }[] = [];
@@ -44,7 +44,7 @@ function getGalleryImages(product: Product): { src: string; alt: string }[] {
 }
 
 function ProductDetails({ description }: { description: string | null }) {
-  const { formatPrice } = useRegion();
+  const { formatPrice, region } = useRegion();
   const [open, setOpen] = useState(false);
 
   return (
@@ -65,7 +65,7 @@ function ProductDetails({ description }: { description: string | null }) {
         <div className="flex items-center gap-3">
           <Package className="h-4 w-4 shrink-0 text-foreground" />
           <span className="text-xs font-bold uppercase tracking-[0.06em]">
-            Free shipping on orders over {formatPrice(170)}
+            Free shipping on orders over {formatPrice(getRegionalFreeShippingThreshold(region))}
           </span>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
 
   const hasArtistItemInCart = product
-    ? items.some((item) => item.product.artist_id === product.artist_id)
+    ? items.some((item) => item.product.artist_id === product.artist_id && item.product.id !== product.id)
     : false;
 
   const backHref = artist?.slug
@@ -243,7 +243,8 @@ export default function ProductDetailPage() {
                     variant="outline"
                     size="icon"
                     className="h-9 w-9 transition-colors duration-200"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(10, quantity + 1))}
+                    disabled={quantity >= 10}
                     aria-label="Increase quantity"
                   >
                     <Plus className="h-4 w-4" />

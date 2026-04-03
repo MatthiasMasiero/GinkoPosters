@@ -47,9 +47,9 @@ export default function StorefrontHomePage() {
             <h2 className="text-sm font-extrabold uppercase tracking-wide md:text-xs md:tracking-[0.2em] md:text-muted-foreground">
               The Collection
             </h2>
-            <span className="text-sm font-bold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground">
+            <a href="#collection" className="text-sm font-bold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground">
               View All
-            </span>
+            </a>
           </div>
         </FadeIn>
 
@@ -57,7 +57,7 @@ export default function StorefrontHomePage() {
           <div className="mx-auto max-w-7xl">
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4 md:gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
+                <div key={i} className="loading-skeleton">
                   <div className="aspect-[3/4] w-full bg-muted" />
                   <div className="mt-3 h-3.5 w-2/3 bg-muted" />
                 </div>

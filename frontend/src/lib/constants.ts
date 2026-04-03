@@ -11,10 +11,12 @@ export const ORDER_STATUSES = [
 export type OrderStatus = (typeof ORDER_STATUSES)[number]["value"];
 
 export const POSTER_SIZES = [
+  { label: "A5", width_cm: 14.8, height_cm: 21 },
   { label: "A4", width_cm: 21, height_cm: 29.7 },
   { label: "A3", width_cm: 29.7, height_cm: 42 },
   { label: "A2", width_cm: 42, height_cm: 59.4 },
   { label: "A1", width_cm: 59.4, height_cm: 84.1 },
+  { label: "A0", width_cm: 84.1, height_cm: 118.9 },
 ] as const;
 
 export const STATUS_COLORS: Record<string, string> = {
@@ -27,6 +29,5 @@ export const STATUS_COLORS: Record<string, string> = {
   refunded: "bg-gray-100 text-gray-800",
 };
 
-export const SHIPPING_COST = 5.99;
 
 export const MULTI_ITEM_DISCOUNT_RATE = 0.15;

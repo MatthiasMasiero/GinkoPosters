@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import {
   type Region,
   getRegionFromCountry,
@@ -27,7 +27,12 @@ function getCountryFromCookie(): string {
 }
 
 export function RegionProvider({ children }: { children: ReactNode }) {
-  const country = getCountryFromCookie();
+  const [country, setCountry] = useState("");
+
+  useEffect(() => {
+    setCountry(getCountryFromCookie());
+  }, []);
+
   const region = getRegionFromCountry(country);
   const config = getRegionConfig(region);
 

@@ -47,9 +47,13 @@ function saveCart(items: CartItem[]) {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [country, setCountry] = useState("");
 
   useEffect(() => {
     setItems(loadCart());
+    const cookies = document.cookie.split(";");
+    const c = cookies.find((c) => c.trim().startsWith("user_country="));
+    setCountry(c?.split("=")[1]?.trim() || "");
     setMounted(true);
   }, []);
 
@@ -99,12 +103,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   // Use regional pricing for calculations
-  const country = (() => {
-    if (typeof document === "undefined") return "";
-    const cookies = document.cookie.split(";");
-    const c = cookies.find((c) => c.trim().startsWith("user_country="));
-    return c?.split("=")[1]?.trim() || "";
-  })();
   const region = getRegionFromCountry(country);
 
   const subtotal = items.reduce(

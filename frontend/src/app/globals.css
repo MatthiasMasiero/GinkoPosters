@@ -134,7 +134,7 @@
 .glass {
   backdrop-filter: blur(50px);
   -webkit-backdrop-filter: blur(50px);
-  background: rgba(255, 255, 255, 0.3);
+  background: color-mix(in oklch, var(--background) 30%, transparent);
 }
 
 .label-uppercase {
@@ -197,6 +197,11 @@
 }
 
 /* Custom scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.07 0 0 / 0.2) transparent;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -219,7 +224,7 @@
   100% { background-position: 200% 0; }
 }
 
-.animate-pulse > div {
+.loading-skeleton > div {
   background: linear-gradient(
     90deg,
     var(--muted) 0%,

@@ -96,10 +96,6 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Add to cart button */}
         <button
           className="absolute bottom-2 right-2 z-20 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
           aria-label="Add to cart"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
