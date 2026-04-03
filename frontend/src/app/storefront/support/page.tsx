@@ -1,40 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Mail } from "lucide-react";
-import { SHIPPING_COST } from "@/lib/constants";
-import { formatCurrency } from "@/lib/utils";
+import { ChevronDown, Mail, Package, Globe, Image } from "lucide-react";
 
 const FAQ_ITEMS = [
   {
     question: "How long does shipping take?",
     answer:
-      "Orders are typically printed and shipped within 3-5 business days. Delivery takes an additional 3-7 business days depending on your location within Europe.",
+      "Orders are typically printed and dispatched within 2–4 business days. Delivery times vary depending on your location and local postal service. Once your order ships, you will receive a tracking number within 24 hours so you can follow its progress.",
   },
   {
     question: "What is the print quality like?",
     answer:
-      "All posters are printed on premium 200gsm matte paper using archival-quality inks. Colours are vibrant and long-lasting, designed to look great on your wall for years.",
+      "All posters are printed on premium 200gsm+ matte paper (depending on location) using archival-quality inks to ensure rich colours, sharp detail, and long-lasting durability. Each print is produced to deliver gallery-quality results designed to look great on your wall for years.",
   },
   {
     question: "Can I return or exchange a poster?",
     answer:
-      "Since every poster is printed on demand, we cannot accept returns for change of mind. However, if your order arrives damaged or there is a printing defect, contact us within 14 days and we will send a replacement at no cost.",
+      "Because each poster is printed to order, we are unable to accept returns for change of mind. However, if your order arrives damaged or with a printing defect, please contact us within 14 days of delivery, and we will arrange a replacement at no additional cost.",
   },
   {
-    question: "Do you ship outside Europe?",
+    question: "Do you ship internationally?",
     answer:
-      "Currently we ship within the EU. We are working on expanding to other regions — reach out to us if you have questions about international orders.",
-  },
-  {
-    question: "Can I request a custom size?",
-    answer:
-      "At the moment we offer A4, A3, A2, and A1 sizes. If you need a custom size, contact us and we will see what we can do.",
+      "Yes — we ship worldwide. Shipping cost, availability, and delivery times may vary depending on your location and local postal services.",
   },
   {
     question: "Do you offer bulk or wholesale pricing?",
     answer:
-      "Yes! If you are interested in ordering multiple prints for a business, event, or gift, reach out to us and we can arrange special pricing.",
+      "Yes. If you are interested in ordering multiple prints for a business, event, or retail location, please contact us, and we can arrange custom pricing for larger orders.",
+  },
+];
+
+const INFO_CARDS = [
+  {
+    icon: Package,
+    title: "SHIPPING",
+    description:
+      "We ship worldwide. Shipping costs and delivery times depend on your location and local postal services.",
+  },
+  {
+    icon: Globe,
+    title: "TRACKING",
+    description:
+      "Printed to order and dispatched within 2–4 business days. Tracking is provided within 24 hours after shipment.",
+  },
+  {
+    icon: Image,
+    title: "PRODUCT DETAILS",
+    description:
+      "Printed on premium 200gsm+ matte paper using archival-quality inks for sharp detail and long-lasting colour. Each poster is printed to order and carefully packaged to arrive in perfect condition, ready to frame and display. Frame not included.",
   },
 ];
 
@@ -99,29 +113,24 @@ export default function SupportPage() {
           </div>
         </section>
 
-        {/* Shipping & Returns */}
+        {/* Shipping, Tracking & Product Details */}
         <section className="mt-16">
-          <h2 className="text-xs font-extrabold uppercase tracking-[0.08em]">
-            Shipping &amp; Returns
-          </h2>
-          <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted-foreground">
-            <p>
-              <span className="font-medium text-foreground">Processing:</span>{" "}
-              All orders are printed on demand and typically ship within 3-5 business days.
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Shipping cost:</span>{" "}
-              Flat rate of {formatCurrency(SHIPPING_COST)} per order within the EU.
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Delivery:</span>{" "}
-              3-7 business days after dispatch, depending on your location.
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Returns:</span>{" "}
-              Since items are printed on demand, we do not accept returns for change of mind.
-              If your order arrives damaged or defective, contact us within 14 days for a free replacement.
-            </p>
+          <div className="divide-y divide-border overflow-hidden rounded-lg bg-muted/50">
+            {INFO_CARDS.map((card) => (
+              <div key={card.title} className="flex items-start gap-5 p-6">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+                  <card.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-extrabold uppercase tracking-[0.08em]">
+                    {card.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {card.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -136,9 +145,8 @@ export default function SupportPage() {
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-medium">Email us</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Have a question, issue, or special request? We typically respond within 24 hours.
+                <p className="text-sm text-muted-foreground">
+                  We typically respond within 24 hours.
                 </p>
                 <a
                   href="mailto:Ginkoposters@gmail.com"

@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { Minus, Plus, X } from "lucide-react";
 import type { CartItem as CartItemType } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
 import { MULTI_ITEM_DISCOUNT_RATE } from "@/lib/constants";
+import { useRegion } from "@/hooks/use-region";
 import { Button } from "@/components/ui/button";
 
 interface CartItemProps {
@@ -20,7 +20,9 @@ export function CartItemRow({
   onUpdateQuantity,
   onRemove,
 }: CartItemProps) {
-  const originalPrice = item.variant.price * item.quantity;
+  const { getPrice, formatPrice } = useRegion();
+  const regionalPrice = getPrice(item.variant.size);
+  const originalPrice = regionalPrice * item.quantity;
   const finalPrice = discounted
     ? originalPrice * (1 - MULTI_ITEM_DISCOUNT_RATE)
     : originalPrice;
@@ -90,15 +92,15 @@ export function CartItemRow({
         {discounted ? (
           <>
             <span className="text-xs text-muted-foreground line-through">
-              {formatCurrency(originalPrice)}
+              {formatPrice(originalPrice)}
             </span>
             <span className="text-sm font-bold text-accent-red">
-              {formatCurrency(finalPrice)}
+              {formatPrice(finalPrice)}
             </span>
           </>
         ) : (
           <span className="text-sm font-bold">
-            {formatCurrency(originalPrice)}
+            {formatPrice(originalPrice)}
           </span>
         )}
         <Button

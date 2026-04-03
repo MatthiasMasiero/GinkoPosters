@@ -213,6 +213,23 @@
   background: oklch(0.07 0 0 / 0.4);
 }
 
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-pulse > div {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    oklch(0.94 0 0) 40%,
+    var(--muted) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .page-enter,

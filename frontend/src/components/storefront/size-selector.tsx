@@ -1,8 +1,8 @@
 "use client";
 
 import type { ProductVariant } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useRegion } from "@/hooks/use-region";
 
 interface SizeSelectorProps {
   variants: ProductVariant[];
@@ -15,6 +15,8 @@ export function SizeSelector({
   selectedId,
   onSelect,
 }: SizeSelectorProps) {
+  const { getPrice, formatPrice } = useRegion();
+
   return (
     <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Size">
       {variants.map((variant) => (
@@ -33,7 +35,7 @@ export function SizeSelector({
         >
           <span className="text-sm font-bold">{variant.size}</span>
           <span className="mt-1 text-sm">
-            {formatCurrency(variant.price)}
+            {formatPrice(getPrice(variant.size))}
           </span>
         </button>
       ))}

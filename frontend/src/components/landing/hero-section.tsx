@@ -36,7 +36,7 @@ export function HeroSection({ posters = [] }: HeroSectionProps) {
         </div>
 
         {/* Content right */}
-        <div className="flex flex-col justify-center px-10 py-24 lg:px-20 xl:px-28 overflow-hidden">
+        <div className="flex flex-col justify-center px-10 py-20 lg:px-16 xl:px-24 overflow-hidden">
           <FadeIn delay={100}>
             <p className="label-uppercase text-muted-foreground">
               Curated Art Prints

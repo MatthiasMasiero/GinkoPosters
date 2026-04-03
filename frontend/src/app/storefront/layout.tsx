@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArtistProvider } from "@/contexts/artist-context";
 import { CartProvider } from "@/contexts/cart-context";
+import { RegionProvider } from "@/contexts/region-context";
 import { StorefrontHeader } from "@/components/layout/storefront-header";
 import { StorefrontFooter } from "@/components/layout/storefront-footer";
 import { api } from "@/lib/api-client";
@@ -66,13 +67,15 @@ function StorefrontContent({ children }: { children: React.ReactNode }) {
 
   return (
     <ArtistProvider artist={artist}>
-      <CartProvider>
-        <div className="flex min-h-screen flex-col">
-          <StorefrontHeader />
-          <main className="flex-1 pt-16">{children}</main>
-          <StorefrontFooter />
-        </div>
-      </CartProvider>
+      <RegionProvider>
+        <CartProvider>
+          <div className="flex min-h-screen flex-col">
+            <StorefrontHeader />
+            <main className="flex-1 pt-16">{children}</main>
+            <StorefrontFooter />
+          </div>
+        </CartProvider>
+      </RegionProvider>
     </ArtistProvider>
   );
 }

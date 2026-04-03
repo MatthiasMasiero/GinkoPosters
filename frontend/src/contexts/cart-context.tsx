@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { CartItem, Product, ProductVariant } from "@/lib/types";
 import { MULTI_ITEM_DISCOUNT_RATE } from "@/lib/constants";
+import { getRegionFromCountry, getRegionalPrice } from "@/lib/regional-pricing";
 
 interface CartContextValue {
   items: CartItem[];
@@ -96,8 +97,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Use regional pricing for calculations
+  const country = (() => {
+    if (typeof document === "undefined") return "";
+    const cookies = document.cookie.split(";");
+    const c = cookies.find((c) => c.trim().startsWith("user_country="));
+    return c?.split("=")[1]?.trim() || "";
+  })();
+  const region = getRegionFromCountry(country);
+
   const subtotal = items.reduce(
-    (sum, item) => sum + item.variant.price * item.quantity,
+    (sum, item) => {
+      const price = getRegionalPrice(region, item.variant.size);
+      return sum + price * item.quantity;
+    },
     0
   );
 
@@ -116,7 +130,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const discount = items.reduce((sum, item) => {
     if (discountedArtists.has(item.product.artist_id)) {
-      return sum + item.variant.price * item.quantity * MULTI_ITEM_DISCOUNT_RATE;
+      const price = getRegionalPrice(region, item.variant.size);
+      return sum + price * item.quantity * MULTI_ITEM_DISCOUNT_RATE;
     }
     return sum;
   }, 0);

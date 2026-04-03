@@ -16,7 +16,7 @@ export function ProductGrid({ products }: ProductGridProps) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4 md:gap-6">
       {products.map((product, index) => (
         <FadeIn key={product.id} delay={index * 100}>
           <ProductCard product={product} />

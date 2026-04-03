@@ -118,9 +118,32 @@ export default function MainLayout({
                 Info
               </p>
               <nav className="mt-4 flex flex-col gap-3">
-                <span className="text-sm text-background/60">
-                  Every print is premium quality, produced on demand
-                </span>
+                <Link
+                  href="/"
+                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+                >
+                  Ginko Posters
+                </Link>
+                <Link
+                  href="/storefront/support"
+                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+                >
+                  Support
+                </Link>
+                <Link
+                  href="#collection"
+                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+                >
+                  Artists
+                </Link>
+                <a
+                  href="https://docs.google.com/document/d/1BEaKotWAeQi03d8-qkNUjIHVxx1iiwpzio45HdgprTU/edit?tab=t.0#heading=h.yu14bf21kmbo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+                >
+                  Legal Conditions
+                </a>
               </nav>
             </div>
           </div>

@@ -53,7 +53,7 @@ export function StorefrontFooter() {
                 href="/"
                 className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
               >
-                GinkoPosters
+                Ginko Posters
               </Link>
               <Link
                 href={`/storefront/support${artistParam}`}
@@ -61,6 +61,20 @@ export function StorefrontFooter() {
               >
                 Support
               </Link>
+              <Link
+                href="/#collection"
+                className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+              >
+                Artists
+              </Link>
+              <a
+                href="https://docs.google.com/document/d/1BEaKotWAeQi03d8-qkNUjIHVxx1iiwpzio45HdgprTU/edit?tab=t.0#heading=h.yu14bf21kmbo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
+              >
+                Legal Conditions
+              </a>
             </nav>
           </div>
         </div>

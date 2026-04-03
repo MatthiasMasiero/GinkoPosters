@@ -12,6 +12,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Detect user country from Vercel geo headers
+  const country = request.headers.get("x-vercel-ip-country") || "";
+
   const hostname = request.headers.get("host") || "";
   const hostWithoutPort = hostname.split(":")[0];
 
@@ -23,18 +26,26 @@ export function middleware(request: NextRequest) {
 
   if (isPrimary) {
     // Primary domain: serve landing/main pages
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.cookies.set("user_country", country, {
+      path: "/",
+      sameSite: "lax",
+    });
+    return response;
   }
 
   // Artist domain: rewrite to storefront routes
   // The storefront layout will handle fetching artist data by domain
-  const url = request.nextUrl.clone();
 
   // Store the artist domain in a cookie for the storefront to use
   const response = NextResponse.rewrite(
     new URL(`/storefront${pathname}`, request.url)
   );
   response.cookies.set("artist_domain", hostWithoutPort, {
+    path: "/",
+    sameSite: "lax",
+  });
+  response.cookies.set("user_country", country, {
     path: "/",
     sameSite: "lax",
   });

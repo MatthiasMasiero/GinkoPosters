@@ -1,7 +1,7 @@
 "use client";
 
-import { formatCurrency } from "@/lib/utils";
 import { SHIPPING_COST } from "@/lib/constants";
+import { useRegion } from "@/hooks/use-region";
 import { Separator } from "@/components/ui/separator";
 
 interface CartSummaryProps {
@@ -12,6 +12,7 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount }: CartSummaryProps) {
+  const { formatPrice } = useRegion();
   const shipping = itemCount > 0 ? SHIPPING_COST : 0;
   const total = discountedSubtotal + shipping;
 
@@ -24,23 +25,23 @@ export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount 
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
-          <span>{formatCurrency(subtotal)}</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
         {discount > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-accent-red">Multi-item discount</span>
-            <span className="text-accent-red">-{formatCurrency(discount)}</span>
+            <span className="text-accent-red">-{formatPrice(discount)}</span>
           </div>
         )}
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Shipping</span>
-          <span>{itemCount > 0 ? formatCurrency(shipping) : "--"}</span>
+          <span>{itemCount > 0 ? formatPrice(shipping) : "--"}</span>
         </div>
       </div>
       <Separator className="my-4" />
       <div className="flex justify-between font-medium">
         <span>Total</span>
-        <span>{formatCurrency(total)}</span>
+        <span>{formatPrice(total)}</span>
       </div>
     </div>
   );
