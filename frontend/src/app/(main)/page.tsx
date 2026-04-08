@@ -86,7 +86,17 @@ export default function LandingPage() {
       <HeroSection posters={posterImages} />
 
       {/* The Collection */}
-      <section id="collection" className="px-6 py-10 md:px-12 md:py-12 lg:px-16">
+      <section id="collection" className="px-6 pt-6 pb-10 md:px-12 md:pt-8 md:pb-12 lg:px-16">
+        <FadeIn>
+          <div className="mb-6 flex items-baseline justify-between md:mb-8">
+            <h2 className="text-sm font-extrabold uppercase tracking-wide md:text-xs md:tracking-[0.2em] md:text-muted-foreground">
+              The Collection
+            </h2>
+            <a href="/storefront" className="text-sm font-bold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground">
+              View All
+            </a>
+          </div>
+        </FadeIn>
 
         {loading ? (
           <div className="mx-auto max-w-7xl">
@@ -121,13 +131,6 @@ export default function LandingPage() {
                       </a>
                     </div>
                   </FadeIn>
-                  {artist.bio && (
-                    <FadeIn delay={100}>
-                      <p className="mt-3 max-w-lg text-sm text-muted-foreground">
-                        {artist.bio}
-                      </p>
-                    </FadeIn>
-                  )}
 
                   {/* Poster grid */}
                   <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
@@ -136,7 +139,6 @@ export default function LandingPage() {
                         <PosterCard
                           product={product}
                           artistSlug={artist.slug}
-                          artistName={artist.name}
                         />
                       </FadeIn>
                     ))}
@@ -166,7 +168,7 @@ export default function LandingPage() {
                 <FadeIn key={poster.src} delay={Math.min(i * 100, 800)}>
                   <div className="group">
                     <a href="/storefront?artist=madebygray" className="block">
-                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
+                      <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
                         <Image
                           src={poster.src}
                           alt={poster.alt}

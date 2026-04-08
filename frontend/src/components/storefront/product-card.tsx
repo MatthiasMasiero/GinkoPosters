@@ -82,6 +82,13 @@ export function ProductCard({ product }: ProductCardProps) {
                 ))}
               </div>
             )}
+
+            {/* Semi-transparent add to cart — bottom right */}
+            <div className="absolute bottom-2 right-2 z-10">
+              <span className="flex items-center gap-1 bg-black/40 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm transition-colors duration-200 hover:bg-black/60">
+                + Cart
+              </span>
+            </div>
           </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-muted">
