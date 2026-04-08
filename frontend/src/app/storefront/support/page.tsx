@@ -87,7 +87,7 @@ function FaqItem({
 
 export default function SupportPage() {
   return (
-    <div className="page-enter px-6 py-12 md:px-12">
+    <div className="page-enter px-4 py-12 pt-16 md:px-12">
       <div className="mx-auto max-w-3xl">
         {/* Hero */}
         <h1 className="text-3xl font-extrabold uppercase tracking-tight">
@@ -115,10 +115,10 @@ export default function SupportPage() {
 
         {/* Shipping, Tracking & Product Details */}
         <section className="mt-16">
-          <div className="divide-y divide-border overflow-hidden rounded-lg bg-muted/50">
+          <div className="divide-y divide-border overflow-hidden bg-muted/50">
             {INFO_CARDS.map((card) => (
               <div key={card.title} className="flex items-start gap-5 p-6">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-foreground text-background">
                   <card.icon className="h-5 w-5" />
                 </div>
                 <div>
@@ -145,8 +145,11 @@ export default function SupportPage() {
                 <Mail className="h-5 w-5" />
               </div>
               <div>
+                <p className="text-xs text-muted-foreground/70 mb-2">
+                  For urgent order issues, include your order number in the subject line.
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  We typically respond within 24 hours.
+                  We typically respond within 1 business day (Monday–Friday).
                 </p>
                 <a
                   href="mailto:Ginkoposters@gmail.com"

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Check,
   Minus,
   Plus,
   RefreshCw,
@@ -104,6 +105,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const { addItem, items } = useCart();
   const { artist } = useArtist();
+  const { getPrice, formatPrice } = useRegion();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     null
@@ -138,12 +140,12 @@ export default function ProductDetailPage() {
     if (!product || !selectedVariant) return;
     addItem(product, selectedVariant, quantity);
     setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    setTimeout(() => setAdded(false), 3000);
   }
 
   if (loading) {
     return (
-      <div className="flex justify-center py-24">
+      <div className="flex justify-center py-24 pt-16">
         <div className="line-loader mx-auto w-24 text-foreground" />
       </div>
     );
@@ -151,7 +153,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="px-6 py-24 text-center md:px-12">
+      <div className="px-4 py-24 pt-16 text-center md:px-12">
         <p className="text-muted-foreground">Product not found.</p>
         <Link
           href={backHref}
@@ -164,9 +166,9 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="page-enter">
+    <div className="page-enter pt-16">
       {/* Back link */}
-      <div className="px-6 pt-8 md:px-12">
+      <div className="px-4 pt-8 md:px-12">
         <div className="mx-auto max-w-7xl">
           <Link
             href={backHref}
@@ -179,7 +181,7 @@ export default function ProductDetailPage() {
       </div>
 
       {hasArtistItemInCart && (
-        <div className="mx-auto mt-6 max-w-7xl px-6 md:px-12">
+        <div className="mx-auto mt-6 max-w-7xl px-4 md:px-12">
           <div className="border border-accent-red/20 bg-accent-red/5 px-4 py-3 text-sm">
             <span className="font-bold text-accent-red">15% off</span>
             <span className="ml-1 text-muted-foreground">
@@ -191,7 +193,7 @@ export default function ProductDetailPage() {
       )}
 
       {/* Main layout: images left, info right (sticky) */}
-      <div className="mx-auto mt-8 max-w-7xl px-6 pb-16 md:px-12">
+      <div className="mx-auto mt-8 max-w-7xl px-4 pb-24 md:px-12 md:pb-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
           {/* Left: scrollable stacked images */}
           <FadeIn direction="up">
@@ -250,19 +252,26 @@ export default function ProductDetailPage() {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+                {quantity >= 10 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Max 10 per order
+                  </p>
+                )}
               </div>
             </FadeIn>
 
-            {/* Add to cart */}
+            {/* Add to cart (desktop only — mobile uses sticky CTA below) */}
             <FadeIn direction="right" delay={400}>
-              <Button
-                className="mt-10 w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]"
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={!selectedVariant}
-              >
-                {added ? "Added to Cart" : "Add to Cart"}
-              </Button>
+              <div className="hidden md:block">
+                <Button
+                  className="mt-10 w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]"
+                  size="lg"
+                  onClick={handleAddToCart}
+                  disabled={!selectedVariant}
+                >
+                  {added ? "Added to Cart" : "Add to Cart"}
+                </Button>
+              </div>
             </FadeIn>
 
             {/* Product details / shipping info */}
@@ -271,6 +280,30 @@ export default function ProductDetailPage() {
             </FadeIn>
           </div>
         </div>
+      </div>
+
+      {/* Sticky mobile CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background p-4 md:hidden">
+        <button
+          onClick={handleAddToCart}
+          disabled={!selectedVariant}
+          className={`flex w-full items-center justify-center gap-2 py-4 text-sm font-extrabold uppercase tracking-[0.08em] transition-all duration-300 disabled:opacity-40 ${
+            added
+              ? "bg-accent-red text-white"
+              : "bg-foreground text-background"
+          }`}
+        >
+          {added ? (
+            <>
+              <Check className="h-4 w-4" />
+              Added to Cart
+            </>
+          ) : selectedVariant ? (
+            `Add to Cart — ${formatPrice(getPrice(selectedVariant.size))}`
+          ) : (
+            "Select a Size"
+          )}
+        </button>
       </div>
     </div>
   );

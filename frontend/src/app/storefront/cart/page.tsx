@@ -14,7 +14,7 @@ export default function CartPage() {
   const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
 
   return (
-    <div className="page-enter px-6 py-12 md:px-12">
+    <div className="page-enter px-4 py-12 pt-16 md:px-12">
       <div className="mx-auto max-w-4xl">
         <h1 className="text-3xl font-extrabold uppercase tracking-tight">
           Shopping Cart
@@ -59,8 +59,17 @@ export default function CartPage() {
             {/* Summary */}
             <div>
               <CartSummary subtotal={subtotal} discount={discount} discountedSubtotal={discountedSubtotal} itemCount={itemCount} />
-              <Link href={`/storefront/checkout${artistParam}`} className="mt-4 block">
-                <Button className="w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]" size="lg">
+              <Link
+                href={items.length > 0 ? `/storefront/checkout${artistParam}` : "#"}
+                className={`mt-4 block ${items.length === 0 ? "pointer-events-none" : ""}`}
+                aria-disabled={items.length === 0}
+                tabIndex={items.length === 0 ? -1 : undefined}
+              >
+                <Button
+                  className="w-full py-6 text-xs font-extrabold uppercase tracking-[0.08em]"
+                  size="lg"
+                  disabled={items.length === 0}
+                >
                   Proceed to Checkout
                 </Button>
               </Link>

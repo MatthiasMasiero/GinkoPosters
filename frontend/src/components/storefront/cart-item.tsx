@@ -56,7 +56,7 @@ export function CartItemRow({
           {item.variant.size}
         </p>
         {discounted && (
-          <span className="mt-1 inline-block rounded-sm bg-accent-red px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+          <span className="mt-1 inline-block bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
             15% off
           </span>
         )}
@@ -65,7 +65,7 @@ export function CartItemRow({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 transition-colors duration-200"
+            className="h-8 w-8 min-h-[44px] min-w-[44px] transition-colors duration-200"
             onClick={() =>
               onUpdateQuantity(item.variant.id, item.quantity - 1)
             }
@@ -77,7 +77,7 @@ export function CartItemRow({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 transition-colors duration-200"
+            className="h-8 w-8 min-h-[44px] min-w-[44px] transition-colors duration-200"
             onClick={() =>
               onUpdateQuantity(item.variant.id, item.quantity + 1)
             }
@@ -106,7 +106,7 @@ export function CartItemRow({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] text-muted-foreground transition-colors duration-200 hover:text-foreground"
           onClick={() => onRemove(item.variant.id)}
           aria-label={`Remove ${item.product.title}`}
         >

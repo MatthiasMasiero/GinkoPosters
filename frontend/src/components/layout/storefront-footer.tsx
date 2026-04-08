@@ -9,7 +9,7 @@ export function StorefrontFooter() {
 
   return (
     <footer className="bg-foreground text-background">
-      <div className="mx-auto max-w-7xl px-6 py-16 md:px-12">
+      <div className="mx-auto max-w-7xl px-6 py-12 md:px-12 md:py-16">
         <div className="grid gap-12 md:grid-cols-3">
           {/* Brand column */}
           <div>

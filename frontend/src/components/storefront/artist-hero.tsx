@@ -20,6 +20,18 @@ const CELL_COUNT = 6;
 const FLIP_INTERVAL = 2200;
 const TRANSITION_MS = 1500;
 
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return reduced;
+}
+
 function getAllImages(products: Product[]): MosaicImage[] {
   return products
     .filter((p) => p.image_url)
@@ -48,6 +60,7 @@ function MosaicCell({
   priority,
   sizes,
   className,
+  reducedMotion,
 }: {
   current: MosaicImage;
   incoming: MosaicImage | null;
@@ -55,6 +68,7 @@ function MosaicCell({
   priority: boolean;
   sizes: string;
   className?: string;
+  reducedMotion?: boolean;
 }) {
   const [show, setShow] = useState(false);
 
@@ -96,7 +110,7 @@ function MosaicCell({
           className="absolute inset-0 object-cover"
           style={{
             opacity: show ? 1 : 0,
-            transition: `opacity ${TRANSITION_MS}ms ease-in-out`,
+            transition: reducedMotion ? "none" : `opacity ${TRANSITION_MS}ms ease-in-out`,
           }}
         />
       )}
@@ -105,6 +119,7 @@ function MosaicCell({
 }
 
 export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) {
+  const prefersReducedMotion = usePrefersReducedMotion();
   const allImages = useMemo(() => getAllImages(products), [products]);
   const initialGrid = useMemo(() => getInitialGrid(allImages), [allImages]);
 
@@ -140,8 +155,9 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
   }
 
   // Cycle: pick next cell from shuffle bag every FLIP_INTERVAL
+  // Disabled when user prefers reduced motion
   useEffect(() => {
-    if (allImages.length === 0 || initialGrid.length === 0) return;
+    if (prefersReducedMotion || allImages.length === 0 || initialGrid.length === 0) return;
 
     const interval = setInterval(() => {
       const cellIndex = pickNextCell();
@@ -155,7 +171,7 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
     }, FLIP_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [allImages.length, initialGrid.length]);
+  }, [prefersReducedMotion, allImages.length, initialGrid.length]);
 
   // Called by MosaicCell when its transition finishes
   function promoteCel(cellIndex: number) {
@@ -175,7 +191,7 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
   const hasImages = grid.length > 0;
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-[100svh] overflow-hidden">
       {/* Background */}
       {heroImageUrl ? (
         <div className="absolute inset-0">
@@ -201,6 +217,7 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
                 priority={i < 3}
                 sizes="33vw"
                 className={i === 0 ? "row-span-2" : ""}
+                reducedMotion={prefersReducedMotion}
               />
             ))}
           </div>
@@ -215,6 +232,7 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
                 onDone={() => promoteCel(i)}
                 priority={i < 2}
                 sizes="50vw"
+                reducedMotion={prefersReducedMotion}
               />
             ))}
           </div>
@@ -224,7 +242,7 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
       )}
 
       {/* Dark overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/15" />
 
       {/* Noise texture overlay for depth */}
       <div
@@ -235,14 +253,14 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
       />
 
       {/* Content overlay — pinned to bottom */}
-      <div className="relative z-10 flex min-h-screen flex-col justify-end">
+      <div className="relative z-10 flex min-h-[100svh] flex-col justify-end">
         <div className="px-8 pb-24 pt-32 md:px-16 lg:px-20">
           <FadeIn delay={100}>
             <p className="label-uppercase text-white/50">Artist</p>
           </FadeIn>
 
           <FadeIn delay={250}>
-            <h1 className="mt-4 text-5xl font-extrabold uppercase leading-[0.9] tracking-tight text-white md:text-7xl lg:text-8xl xl:text-9xl">
+            <h1 className="mt-4 text-6xl font-extrabold uppercase leading-[0.85] tracking-tight text-white md:text-7xl lg:text-8xl xl:text-9xl">
               {artist.name}
             </h1>
           </FadeIn>
@@ -266,12 +284,18 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — clicking scrolls past the hero */}
       <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2">
         <FadeIn delay={800}>
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-px animate-pulse bg-white/30" />
-          </div>
+          <button
+            aria-label="Scroll to collection"
+            onClick={() => {
+              document.getElementById("collection")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="flex flex-col items-center gap-2 cursor-pointer"
+          >
+            <div className={`h-8 w-px bg-white/30 ${prefersReducedMotion ? "" : "animate-pulse"}`} />
+          </button>
         </FadeIn>
       </div>
     </section>

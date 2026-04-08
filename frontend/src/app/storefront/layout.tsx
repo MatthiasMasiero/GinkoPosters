@@ -60,7 +60,7 @@ function StorefrontContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+        <div className="line-loader mx-auto w-24 text-foreground" />
       </div>
     );
   }
@@ -71,7 +71,7 @@ function StorefrontContent({ children }: { children: React.ReactNode }) {
         <CartProvider>
           <div className="flex min-h-screen flex-col">
             <StorefrontHeader />
-            <main className="flex-1 pt-16">{children}</main>
+            <main className="flex-1">{children}</main>
             <StorefrontFooter />
           </div>
         </CartProvider>
@@ -89,7 +89,7 @@ export default function StorefrontLayout({
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+          <div className="line-loader mx-auto w-24 text-foreground" />
         </div>
       }
     >

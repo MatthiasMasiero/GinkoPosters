@@ -20,7 +20,7 @@ export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount 
   const total = discountedSubtotal + shipping;
 
   return (
-    <div className="rounded-lg border p-6">
+    <div className="border p-6">
       <h3 className="text-sm font-medium uppercase tracking-wider">
         Order Summary
       </h3>
@@ -37,12 +37,17 @@ export function CartSummary({ subtotal, discount, discountedSubtotal, itemCount 
           </div>
         )}
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Shipping</span>
+          <span className="text-muted-foreground">
+            Shipping
+            {itemCount > 0 && !isFreeShipping && (
+              <span className="ml-1 text-xs text-muted-foreground/60">(calculated at checkout)</span>
+            )}
+          </span>
           <span>{itemCount > 0 ? (isFreeShipping ? "Free" : formatPrice(shipping)) : "--"}</span>
         </div>
         {itemCount > 0 && !isFreeShipping && (
-          <p className="text-xs text-muted-foreground">
-            Free shipping on orders over {formatPrice(threshold)}
+          <p className="text-xs font-medium text-foreground/70">
+            Add {formatPrice(threshold - discountedSubtotal)} more for free shipping!
           </p>
         )}
       </div>

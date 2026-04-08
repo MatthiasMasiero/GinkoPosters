@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, ShoppingBag } from "lucide-react";
 import { useArtist } from "@/hooks/use-artist";
 import { useCart } from "@/hooks/use-cart";
@@ -11,14 +12,25 @@ export function StorefrontHeader() {
   const { artist } = useArtist();
   const { itemCount } = useCart();
   const { scrollDirection, isAtTop } = useScrollDirection();
+  const pathname = usePathname();
 
   const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
   const hidden = scrollDirection === "down" && !isAtTop;
+  // Only use transparent/white header on the storefront home page (which has the hero)
+  const isHeroPage = pathname === "/storefront";
+  const isOverHero = isAtTop && isHeroPage;
 
   return (
     <header
-      className="glass fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 transition-transform duration-300 md:px-12"
-      style={{ transform: hidden ? "translateY(-100%)" : "translateY(0)" }}
+      className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12"
+      style={{
+        transform: hidden ? "translateY(-100%)" : "translateY(0)",
+        transition: "transform 300ms ease, color 300ms ease, background 300ms ease, backdrop-filter 300ms ease",
+        color: isOverHero ? "white" : "var(--foreground)",
+        backdropFilter: isOverHero || isAtTop ? "blur(0px)" : "blur(50px)",
+        WebkitBackdropFilter: isOverHero || isAtTop ? "blur(0px)" : "blur(50px)",
+        background: isOverHero || isAtTop ? "transparent" : "color-mix(in oklch, var(--background) 30%, transparent)",
+      }}
     >
       {/* Mobile hamburger */}
       <div className="md:hidden">
@@ -37,11 +49,11 @@ export function StorefrontHeader() {
         {artist?.name || "Store"}
       </Link>
 
-      {/* Desktop nav */}
+      {/* Desktop nav — links inherit the header's smoothly-transitioning color */}
       <nav className="hidden items-center gap-6 md:flex">
         <Link
           href="/"
-          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
           <span className="transition-opacity duration-200 group-hover:opacity-0">
             GinkoPosters
@@ -52,7 +64,7 @@ export function StorefrontHeader() {
         </Link>
         <Link
           href={`/storefront${artistParam}`}
-          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
           <span className="transition-opacity duration-200 group-hover:opacity-0">
             Shop
@@ -63,7 +75,7 @@ export function StorefrontHeader() {
         </Link>
         <Link
           href={`/storefront/support${artistParam}`}
-          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          className="group relative text-xs font-extrabold uppercase tracking-[0.08em] opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
           <span className="transition-opacity duration-200 group-hover:opacity-0">
             Support
@@ -75,7 +87,7 @@ export function StorefrontHeader() {
         <Link
           href={`/storefront/cart${artistParam}`}
           aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
-          className="relative text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          className="relative opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
           <ShoppingBag className="h-5 w-5" />
           {itemCount > 0 && (

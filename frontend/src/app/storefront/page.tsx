@@ -41,9 +41,9 @@ export default function StorefrontHomePage() {
       )}
 
       {/* The Collection */}
-      <section id="collection" className="px-4 py-8 md:px-12 md:py-12 lg:px-16">
+      <section id="collection">
         <FadeIn>
-          <div className="mb-6 flex items-baseline justify-between md:mb-8">
+          <div className="mb-6 flex items-baseline justify-between px-4 pt-8 md:mb-8 md:px-12 md:pt-12 lg:px-16">
             <h2 className="text-sm font-extrabold uppercase tracking-wide md:text-xs md:tracking-[0.2em] md:text-muted-foreground">
               The Collection
             </h2>
@@ -54,20 +54,13 @@ export default function StorefrontHomePage() {
         </FadeIn>
 
         {loading ? (
-          <div className="mx-auto max-w-7xl">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4 md:gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="loading-skeleton">
-                  <div className="aspect-[3/4] w-full bg-muted" />
-                  <div className="mt-3 h-3.5 w-2/3 bg-muted" />
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-[4/5] w-full bg-muted" />
+            ))}
           </div>
         ) : (
-          <div className="mx-auto max-w-7xl">
-            <ProductGrid products={products} />
-          </div>
+          <ProductGrid products={products} />
         )}
       </section>
     </>

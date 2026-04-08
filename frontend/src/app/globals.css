@@ -235,6 +235,24 @@ html {
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
+/* Fluid heading typography */
+.fluid-heading {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Hide scrollbar utility (for swipe carousels) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .page-enter,

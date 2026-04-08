@@ -8,6 +8,16 @@ import { CheckCircle2 } from "lucide-react";
 import { FadeIn } from "@/components/landing/fade-in";
 import { Button } from "@/components/ui/button";
 
+function humanStatus(status: string | null): string {
+  switch (status) {
+    case "pending":      return "Order Received";
+    case "processing":   return "Being Processed";
+    case "shipped":      return "On Its Way";
+    case "delivered":    return "Delivered";
+    default:             return status ? status.charAt(0).toUpperCase() + status.slice(1) : "—";
+  }
+}
+
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
@@ -39,7 +49,7 @@ function OrderConfirmationContent() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-24">
+      <div className="flex justify-center py-24 pt-16">
         <div className="line-loader mx-auto w-24 text-foreground" />
       </div>
     );
@@ -47,7 +57,7 @@ function OrderConfirmationContent() {
 
   if (!orderId || !orderNumber) {
     return (
-      <div className="px-6 py-24 text-center md:px-12">
+      <div className="px-4 py-24 pt-16 text-center md:px-12">
         <p className="text-muted-foreground">Order not found.</p>
         <Link
           href={storeHref}
@@ -60,9 +70,9 @@ function OrderConfirmationContent() {
   }
 
   return (
-    <div className="page-enter flex flex-col items-center px-6 py-24 text-center md:px-12">
+    <div className="page-enter flex flex-col items-center px-4 py-24 pt-16 text-center md:px-12">
       <FadeIn duration={500}>
-        <CheckCircle2 className="h-16 w-16 text-green-600" />
+        <CheckCircle2 className="h-16 w-16 text-foreground" />
       </FadeIn>
       <FadeIn delay={200}>
         <h1 className="mt-6 text-3xl font-extrabold uppercase tracking-tight">
@@ -73,25 +83,30 @@ function OrderConfirmationContent() {
         <p className="mt-4 text-muted-foreground">
           Your order has been placed successfully.
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          A confirmation email has been sent to your address.
+        </p>
       </FadeIn>
       <FadeIn delay={500}>
-        <div className="mt-8 border px-8 py-6">
+        <div className="mt-8 border px-8 py-8">
           <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground">
             Order Number
           </p>
-          <p className="mt-1 text-lg font-bold">{orderNumber}</p>
-          <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground">
+          <p className="mt-2 text-3xl font-extrabold tracking-tight">{orderNumber}</p>
+          <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground">
             Status
           </p>
-          <p className="mt-1 text-sm font-bold capitalize">{status}</p>
+          <p className="mt-1 text-sm font-bold">{humanStatus(status)}</p>
         </div>
       </FadeIn>
       <FadeIn delay={650}>
-        <Link href={storeHref} className="mt-10">
-          <Button variant="outline" className="text-xs font-extrabold uppercase tracking-[0.08em]">
-            Back to Store
-          </Button>
-        </Link>
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <Link href={storeHref}>
+            <Button className="text-xs font-extrabold uppercase tracking-[0.08em]">
+              Continue Shopping
+            </Button>
+          </Link>
+        </div>
       </FadeIn>
     </div>
   );
