@@ -49,6 +49,12 @@ export default function MainLayout({
                   Home
                 </Link>
                 <Link
+                  href="/gallery"
+                  className="px-8 py-5 text-2xl font-extrabold uppercase tracking-tight transition-colors hover:bg-muted"
+                >
+                  Gallery
+                </Link>
+                <Link
                   href="#collection"
                   className="px-8 py-5 text-2xl font-extrabold uppercase tracking-tight transition-colors hover:bg-muted"
                 >
@@ -67,6 +73,17 @@ export default function MainLayout({
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
+          <Link
+            href="/gallery"
+            className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          >
+            <span className="transition-opacity duration-200 group-hover:opacity-0">
+              Gallery
+            </span>
+            <span className="absolute inset-0 italic opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              Gallery
+            </span>
+          </Link>
           <Link
             href="#collection"
             className="group relative text-xs font-extrabold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
