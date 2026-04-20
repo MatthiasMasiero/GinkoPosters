@@ -56,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     ? `opacity-100 ${hasMultipleImages ? "md:group-hover:opacity-0" : ""}`
                     : i === activeIndex
                       ? "opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                      : "opacity-0"
+                      : "opacity-0 md:group-hover:opacity-100"
                 }`}
               />
             ))}
