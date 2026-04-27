@@ -104,75 +104,18 @@ export default function MainLayout({
       {/* Main content */}
       <main className="flex-1">{children}</main>
 
-      {/* Dark inverted footer */}
+      {/* Minimal footer */}
       <footer className="bg-foreground text-background">
-        <div className="mx-auto max-w-7xl px-6 py-16 md:px-12">
-          <div className="grid gap-12 md:grid-cols-3">
-            <div>
-              <p className="text-sm font-extrabold uppercase tracking-[0.08em]">
-                GinkoPosters
-              </p>
-              <p className="mt-3 text-sm text-background/60">
-                Curated art prints from independent artists. Premium quality,
-                produced on demand.
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-background/40">
-                Explore
-              </p>
-              <nav className="mt-4 flex flex-col gap-3">
-                <Link
-                  href="#collection"
-                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
-                >
-                  The Collection
-                </Link>
-              </nav>
-            </div>
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-background/40">
-                Info
-              </p>
-              <nav className="mt-4 flex flex-col gap-3">
-                <Link
-                  href="/"
-                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
-                >
-                  Ginko Posters
-                </Link>
-                <Link
-                  href="/storefront/support"
-                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
-                >
-                  Support
-                </Link>
-                <Link
-                  href="#collection"
-                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
-                >
-                  Artists
-                </Link>
-                <a
-                  href="https://docs.google.com/document/d/1BEaKotWAeQi03d8-qkNUjIHVxx1iiwpzio45HdgprTU/edit?tab=t.0#heading=h.yu14bf21kmbo"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-background/60 transition-colors duration-200 hover:text-background"
-                >
-                  Legal Conditions
-                </a>
-              </nav>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-background/10 px-6 py-6 md:px-12">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 md:flex-row">
-            <span className="text-xs text-background/40">
-              &copy; {new Date().getFullYear()} GinkoPosters
-            </span>
-            <span className="text-xs text-background/40">
-              Powered by GinkoPosters
-            </span>
+        <div className="mx-auto max-w-7xl px-6 py-5 md:px-12">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <p className="text-xs font-extrabold uppercase tracking-[0.08em]">GinkoPosters</p>
+            <nav className="flex flex-wrap gap-x-6 gap-y-2">
+              <Link href="#collection" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">The Collection</Link>
+              <Link href="/storefront/support" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Support</Link>
+              <Link href="#collection" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Artists</Link>
+              <Link href="/storefront/legal" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Legal</Link>
+            </nav>
+            <span className="text-xs text-background/40">&copy; {new Date().getFullYear()} GinkoPosters</span>
           </div>
         </div>
       </footer>
