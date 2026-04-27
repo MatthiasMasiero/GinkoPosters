@@ -114,6 +114,43 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
 
+  useEffect(() => {
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const root = document.documentElement;
+
+    function handleScroll() {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = maxScroll > 0 ? Math.min(window.scrollY / maxScroll, 1) : 0;
+      root.style.setProperty("--background", `oklch(${lerp(1, 0.145, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--card", `oklch(${lerp(1, 0.205, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--card-foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--primary", `oklch(${lerp(0.07, 0.922, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--primary-foreground", `oklch(${lerp(0.985, 0.205, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--muted", `oklch(${lerp(0.97, 0.269, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--muted-foreground", `oklch(${lerp(0.556, 0.708, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--secondary", `oklch(${lerp(0.97, 0.269, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--secondary-foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--accent", `oklch(${lerp(0.97, 0.269, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--accent-foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--border", `oklch(${lerp(0.922, 0.25, progress).toFixed(3)} 0 0)`);
+      root.style.setProperty("--input", `oklch(${lerp(0.922, 0.25, progress).toFixed(3)} 0 0)`);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      const vars = [
+        "--background", "--foreground", "--card", "--card-foreground",
+        "--primary", "--primary-foreground", "--muted", "--muted-foreground",
+        "--secondary", "--secondary-foreground", "--accent", "--accent-foreground",
+        "--border", "--input",
+      ];
+      vars.forEach((v) => root.style.removeProperty(v));
+    };
+  }, []);
+
   const hasArtistItemInCart = product
     ? items.some((item) => item.product.artist_id === product.artist_id && item.product.id !== product.id)
     : false;
