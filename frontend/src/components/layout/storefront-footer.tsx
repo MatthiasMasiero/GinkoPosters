@@ -12,27 +12,22 @@ export function StorefrontFooter() {
 
   return (
     <footer
-      className="text-background"
+      className="text-white"
       style={{ backgroundColor: isProductPage ? "#0d0d0d" : "var(--foreground)" }}
     >
       <div className="mx-auto max-w-7xl px-6 py-5 md:px-12">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          {/* Brand */}
           <p className="text-xs font-extrabold uppercase tracking-[0.08em]">
             {artist?.name || "Store"}
           </p>
-
-          {/* Nav links */}
           <nav className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href={`/storefront${artistParam}`} className="text-xs text-background/60 transition-colors duration-200 hover:text-background">All Products</Link>
-            <Link href={`/storefront/cart${artistParam}`} className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Cart</Link>
-            <Link href={`/storefront/support${artistParam}`} className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Support</Link>
-            <Link href="/#collection" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Artists</Link>
-            <Link href={`/storefront/legal${artistParam}`} className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Legal</Link>
+            <Link href={`/storefront${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">All Products</Link>
+            <Link href={`/storefront/cart${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Cart</Link>
+            <Link href={`/storefront/support${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Support</Link>
+            <Link href="/#collection" className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Artists</Link>
+            <Link href={`/storefront/legal${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Legal</Link>
           </nav>
-
-          {/* Copyright */}
-          <span className="text-xs text-background/40">
+          <span className="text-xs text-white/40">
             &copy; {new Date().getFullYear()} GinkoPosters
           </span>
         </div>

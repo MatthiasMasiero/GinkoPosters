@@ -105,17 +105,17 @@ export default function MainLayout({
       <main className="flex-1">{children}</main>
 
       {/* Minimal footer */}
-      <footer className="bg-foreground text-background">
+      <footer className="bg-foreground text-white">
         <div className="mx-auto max-w-7xl px-6 py-5 md:px-12">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="text-xs font-extrabold uppercase tracking-[0.08em]">GinkoPosters</p>
             <nav className="flex flex-wrap gap-x-6 gap-y-2">
-              <Link href="#collection" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">The Collection</Link>
-              <Link href="/storefront/support" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Support</Link>
-              <Link href="#collection" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Artists</Link>
-              <Link href="/storefront/legal" className="text-xs text-background/60 transition-colors duration-200 hover:text-background">Legal</Link>
+              <Link href="#collection" className="text-xs text-white/60 transition-colors duration-200 hover:text-white">The Collection</Link>
+              <Link href="/storefront/support" className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Support</Link>
+              <Link href="#collection" className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Artists</Link>
+              <Link href="/storefront/legal" className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Legal</Link>
             </nav>
-            <span className="text-xs text-background/40">&copy; {new Date().getFullYear()} GinkoPosters</span>
+            <span className="text-xs text-white/40">&copy; {new Date().getFullYear()} GinkoPosters</span>
           </div>
         </div>
       </footer>
