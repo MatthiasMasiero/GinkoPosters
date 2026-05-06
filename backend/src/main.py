@@ -55,12 +55,16 @@ async def lifespan(app: FastAPI):
             origins.append(settings.FRONTEND_URL)
             origins.append(f"http://{settings.PRIMARY_DOMAIN}:3000")
             origins.append("http://localhost:3000")
+            origins.append("https://www.ginkoposters.com")
+            origins.append("https://ginkoposters.com")
             app.state.allowed_origins = origins
     except Exception as e:
         logger.warning("Could not load artist domains for CORS: %s", e)
         app.state.allowed_origins = [
             settings.FRONTEND_URL,
             "http://localhost:3000",
+            "https://www.ginkoposters.com",
+            "https://ginkoposters.com",
         ]
 
     # Background task: cancel stale pending orders every 10 minutes
