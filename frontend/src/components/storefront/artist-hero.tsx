@@ -260,7 +260,7 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
           </FadeIn>
 
           <FadeIn delay={250}>
-            <h1 className="mt-4 text-6xl font-extrabold uppercase leading-[0.85] tracking-tight text-white md:text-7xl lg:text-8xl xl:text-9xl">
+            <h1 className="mt-4 text-[clamp(1.5rem,7.5vw,3rem)] font-extrabold uppercase leading-[0.85] tracking-tight text-white md:text-7xl lg:text-8xl xl:text-9xl">
               {artist.name}
             </h1>
           </FadeIn>

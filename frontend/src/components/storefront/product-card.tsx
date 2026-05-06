@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/lib/types";
@@ -9,9 +8,14 @@ import { useArtist } from "@/hooks/use-artist";
 
 interface ProductCardProps {
   product: Product;
+  /**
+   * Mobile: when true, the card's second image is the visible slide.
+   * Driven by scroll progress at the grid level. Ignored on desktop (hover handles it).
+   */
+  isActive?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, isActive = false }: ProductCardProps) {
   const { artist } = useArtist();
 
   // Build image list: main image + up to 1 gallery image (max 2 total)
@@ -22,18 +26,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }
   const hasMultipleImages = images.length > 1;
 
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const handleImageTap = useCallback(
-    (e: React.MouseEvent) => {
-      // Only cycle images on mobile (md breakpoint = 768px)
-      if (!hasMultipleImages || window.innerWidth >= 768) return;
-      e.preventDefault();
-      e.stopPropagation();
-      setActiveIndex((prev) => (prev + 1) % images.length);
-    },
-    [hasMultipleImages, images.length]
-  );
+  const activeIndex = hasMultipleImages && isActive ? 1 : 0;
 
   const href = artist?.slug
     ? `/storefront/products/${product.id}?artist=${artist.slug}`
@@ -44,31 +37,39 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
         {images.length > 0 ? (
           <>
-            {images.map((src, i) => (
-              <Image
-                key={src}
-                src={src}
-                alt={i === 0 ? product.title : `${product.title} - view ${i + 1}`}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className={`object-cover transition-all duration-500 ease-out group-hover:scale-[1.02] ${
-                  i === 0
-                    ? `opacity-100 ${hasMultipleImages ? "md:group-hover:opacity-0" : ""}`
-                    : i === activeIndex
-                      ? "opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                      : "opacity-0 md:group-hover:opacity-100"
-                }`}
-              />
-            ))}
-            {/* Mobile tap zone for image cycling */}
-            {hasMultipleImages && (
-              <button
-                type="button"
-                className="absolute inset-0 z-10 md:hidden"
-                onClick={handleImageTap}
-                aria-label="Next image"
-              />
-            )}
+            {images.map((src, i) => {
+              // Mobile: slide horizontally based on activeIndex
+              // image 0 sits at x=0 / slides off to -100%; image 1 sits at +100% / slides to 0
+              const slide =
+                i === 0
+                  ? activeIndex === 0
+                    ? "translate-x-0"
+                    : "-translate-x-full"
+                  : activeIndex === 1
+                    ? "translate-x-0"
+                    : "translate-x-full";
+              // Desktop: keep both stacked (no slide), opacity-fade on hover
+              const desktopOpacity =
+                i === 0
+                  ? hasMultipleImages
+                    ? "md:group-hover:opacity-0"
+                    : ""
+                  : "md:opacity-0 md:group-hover:opacity-100";
+              return (
+                <Image
+                  key={src}
+                  src={src}
+                  alt={i === 0 ? product.title : `${product.title} - view ${i + 1}`}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  quality={70}
+                  draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
+                  className={`no-save-img object-cover opacity-100 transition-transform duration-500 ease-out md:translate-x-0 md:transition-all md:group-hover:scale-[1.02] ${slide} ${desktopOpacity}`}
+                />
+              );
+            })}
             {/* Mobile dot indicators */}
             {hasMultipleImages && (
               <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 md:hidden">

@@ -253,6 +253,15 @@ html {
   display: none;
 }
 
+/* Discourage casual image saving (right-click, drag, iOS long-press save) */
+.no-save-img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .page-enter,

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Mail, Package, Globe, Image } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import NextImage from "next/image";
 
 const FAQ_ITEMS = [
   {
@@ -28,27 +29,6 @@ const FAQ_ITEMS = [
     question: "Do you offer bulk or wholesale pricing?",
     answer:
       "Yes. If you are interested in ordering multiple prints for a business, event, or retail location, please contact us, and we can arrange custom pricing for larger orders.",
-  },
-];
-
-const INFO_CARDS = [
-  {
-    icon: Package,
-    title: "SHIPPING",
-    description:
-      "We ship worldwide. Shipping costs and delivery times depend on your location and local postal services.",
-  },
-  {
-    icon: Globe,
-    title: "TRACKING",
-    description:
-      "Printed to order and dispatched within 2–4 business days. Tracking is provided within 24 hours after shipment.",
-  },
-  {
-    icon: Image,
-    title: "PRODUCT DETAILS",
-    description:
-      "Printed on premium 200gsm+ matte paper using archival-quality inks for sharp detail and long-lasting colour. Each poster is printed to order and carefully packaged to arrive in perfect condition, ready to frame and display. Frame not included.",
   },
 ];
 
@@ -113,27 +93,6 @@ export default function SupportPage() {
           </div>
         </section>
 
-        {/* Shipping, Tracking & Product Details */}
-        <section className="mt-16">
-          <div className="divide-y divide-border overflow-hidden bg-muted/50">
-            {INFO_CARDS.map((card) => (
-              <div key={card.title} className="flex items-start gap-5 p-6">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-foreground text-background">
-                  <card.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-extrabold uppercase tracking-[0.08em]">
-                    {card.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {card.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Contact */}
         <section className="mt-16">
           <h2 className="text-xs font-extrabold uppercase tracking-[0.08em]">
@@ -141,9 +100,14 @@ export default function SupportPage() {
           </h2>
           <div className="mt-6 border border-border p-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center bg-foreground text-background">
-                <Mail className="h-5 w-5" />
-              </div>
+              <NextImage
+                src="/ginko-leaf.png"
+                alt="Ginko Posters"
+                width={48}
+                height={48}
+                className="h-12 w-12 flex-shrink-0 object-contain"
+              />
+
               <div>
                 <p className="text-xs text-muted-foreground/70 mb-2">
                   For urgent order issues, include your order number in the subject line.

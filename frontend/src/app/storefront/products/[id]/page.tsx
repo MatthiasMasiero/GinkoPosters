@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useRegion } from "@/hooks/use-region";
-import { getRegionalFreeShippingThreshold } from "@/lib/regional-pricing";
 
 function getGalleryImages(product: Product): { src: string; alt: string }[] {
   const images: { src: string; alt: string }[] = [];
@@ -44,59 +43,78 @@ function getGalleryImages(product: Product): { src: string; alt: string }[] {
   return images;
 }
 
-function ProductDetails({ description }: { description: string | null }) {
-  const { formatPrice, region } = useRegion();
+function InfoAccordion({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: typeof RefreshCw;
+  title: string;
+  body: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mt-8 border-t border-border pt-6">
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <RefreshCw className="h-4 w-4 shrink-0 text-foreground" />
-          <span className="text-xs font-bold uppercase tracking-[0.06em]">
-            Exchange for free within 30 days
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Truck className="h-4 w-4 shrink-0 text-foreground" />
-          <span className="text-xs font-bold uppercase tracking-[0.06em]">
-            Delivered within 5–10 business days
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Package className="h-4 w-4 shrink-0 text-foreground" />
-          <span className="text-xs font-bold uppercase tracking-[0.06em]">
-            Free shipping on orders over {formatPrice(getRegionalFreeShippingThreshold(region))}
-          </span>
-        </div>
-      </div>
-
-      {description && (
-        <div className="mt-5">
-          <button
-            onClick={() => setOpen(!open)}
-            className="flex items-center gap-1 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground"
-          >
-            See details
-            <ChevronDown
-              className={cn(
-                "h-3.5 w-3.5 transition-transform duration-200",
-                open && "rotate-180"
-              )}
-            />
-          </button>
-          <div
-            className={cn(
-              "overflow-hidden transition-all duration-300 ease-out",
-              open ? "mt-3 max-h-96 opacity-100" : "max-h-0 opacity-0"
-            )}
-          >
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {description}
-            </p>
+    <div className="border-b border-border">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center gap-3 py-4 text-left transition-colors hover:text-foreground/80"
+      >
+        <Icon className="h-4 w-4 shrink-0 text-foreground" />
+        <span className="flex-1 text-xs font-bold uppercase tracking-[0.06em]">
+          {title}
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+      <div
+        className={cn(
+          "grid transition-all duration-200",
+          open ? "grid-rows-[1fr] pb-4" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="pl-7 text-sm leading-relaxed text-muted-foreground">
+            {body}
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
+
+function ProductDetails({ description }: { description: string | null }) {
+  return (
+    <div className="mt-8 border-t border-border">
+      <InfoAccordion
+        icon={RefreshCw}
+        title="Shipping"
+        body="We ship worldwide. Shipping costs and delivery times depend on your location and local postal services."
+      />
+      <InfoAccordion
+        icon={Truck}
+        title="Tracking"
+        body="Printed to order and dispatched within 2–4 business days. Tracking is provided within 24 hours after shipment."
+      />
+      <InfoAccordion
+        icon={Package}
+        title="Product details"
+        body={
+          <>
+            <p>
+              Printed on premium 200gsm+ matte paper using archival-quality inks
+              for sharp detail and long-lasting colour. Each poster is printed
+              to order and carefully packaged to arrive in perfect condition,
+              ready to frame and display. Frame not included.
+            </p>
+            {description && <p className="mt-3">{description}</p>}
+          </>
+        }
+      />
     </div>
   );
 }
@@ -113,43 +131,6 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
-
-  useEffect(() => {
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-    const root = document.documentElement;
-
-    function handleScroll() {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = maxScroll > 0 ? Math.min(window.scrollY / maxScroll, 1) : 0;
-      root.style.setProperty("--background", `oklch(${lerp(1, 0.145, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--card", `oklch(${lerp(1, 0.205, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--card-foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--primary", `oklch(${lerp(0.07, 0.922, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--primary-foreground", `oklch(${lerp(0.985, 0.205, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--muted", `oklch(${lerp(0.97, 0.269, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--muted-foreground", `oklch(${lerp(0.556, 0.708, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--secondary", `oklch(${lerp(0.97, 0.269, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--secondary-foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--accent", `oklch(${lerp(0.97, 0.269, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--accent-foreground", `oklch(${lerp(0.07, 0.985, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--border", `oklch(${lerp(0.922, 0.25, progress).toFixed(3)} 0 0)`);
-      root.style.setProperty("--input", `oklch(${lerp(0.922, 0.25, progress).toFixed(3)} 0 0)`);
-    }
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      const vars = [
-        "--background", "--foreground", "--card", "--card-foreground",
-        "--primary", "--primary-foreground", "--muted", "--muted-foreground",
-        "--secondary", "--secondary-foreground", "--accent", "--accent-foreground",
-        "--border", "--input",
-      ];
-      vars.forEach((v) => root.style.removeProperty(v));
-    };
-  }, []);
 
   const hasArtistItemInCart = product
     ? items.some((item) => item.product.artist_id === product.artist_id && item.product.id !== product.id)
@@ -238,7 +219,7 @@ export default function ProductDetailPage() {
           </FadeIn>
 
           {/* Right: sticky product info */}
-          <div className="lg:sticky lg:top-8 lg:self-start">
+          <div className="lg:sticky lg:top-36 lg:self-start">
             <FadeIn direction="right" delay={100}>
               <h1 className="text-3xl font-extrabold uppercase tracking-tight">
                 {product.title}
