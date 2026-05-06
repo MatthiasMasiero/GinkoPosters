@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PRIMARY_DOMAIN = process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || "localhost";
+const PRIMARY_DOMAINS = (process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || "localhost")
+  .split(",")
+  .map((d) => d.trim().toLowerCase())
+  .filter(Boolean);
 
 const SKIP_PREFIXES = ["/_next", "/api", "/favicon.ico", "/admin"];
 
@@ -16,13 +19,14 @@ export function middleware(request: NextRequest) {
   const country = request.headers.get("x-vercel-ip-country") || "";
 
   const hostname = request.headers.get("host") || "";
-  const hostWithoutPort = hostname.split(":")[0];
+  const hostWithoutPort = hostname.split(":")[0].toLowerCase();
 
   // Check if this is the primary domain
   const isPrimary =
-    hostWithoutPort === PRIMARY_DOMAIN ||
+    PRIMARY_DOMAINS.includes(hostWithoutPort) ||
     hostWithoutPort === "localhost" ||
-    hostWithoutPort === "127.0.0.1";
+    hostWithoutPort === "127.0.0.1" ||
+    hostWithoutPort.endsWith(".vercel.app");
 
   if (isPrimary) {
     // Primary domain: serve landing/main pages
