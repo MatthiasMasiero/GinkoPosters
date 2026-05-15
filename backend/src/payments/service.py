@@ -1,9 +1,11 @@
 import uuid
 
 import stripe
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.accounting.models import Transaction
+from src.artists.models import Artist
 from src.config import settings
 from src.emails.service import send_order_confirmation
 from src.orders.service import get_order_by_id, get_order_by_stripe_session
@@ -60,12 +62,19 @@ async def create_checkout_session(
         }
     )
 
+    # Build store URL prefix from artist slug so Stripe redirects land on the
+    # clean /{slug}/... pattern instead of the legacy /storefront route.
+    artist_slug = (
+        await db.execute(select(Artist.slug).where(Artist.id == order.artist_id))
+    ).scalar_one_or_none()
+    store_prefix = f"/{artist_slug}" if artist_slug else "/storefront"
+
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         line_items=line_items,
         mode="payment",
-        success_url=f"{settings.FRONTEND_URL}/storefront/order-confirmation?order_id={order.id}",
-        cancel_url=f"{settings.FRONTEND_URL}/storefront/checkout?order_id={order.id}&cancelled=true",
+        success_url=f"{settings.FRONTEND_URL}{store_prefix}/order-confirmation?order_id={order.id}",
+        cancel_url=f"{settings.FRONTEND_URL}{store_prefix}/checkout?order_id={order.id}&cancelled=true",
         customer_email=order.customer_email,
         metadata={"order_id": str(order.id)},
     )
