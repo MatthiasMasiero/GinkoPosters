@@ -101,7 +101,7 @@ export default function SupportPage() {
           <div className="mt-6 border border-border p-6">
             <div className="flex items-start gap-4">
               <NextImage
-                src="/ginko-leaf.png"
+                src="/ginko-bw-logo.png"
                 alt="Ginko Posters"
                 width={48}
                 height={48}
