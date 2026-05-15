@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRef, useState } from "react";
 import type { Product } from "@/lib/types";
 import { useArtist } from "@/hooks/use-artist";
 import { storeUrl } from "@/lib/store-url";
@@ -9,14 +10,9 @@ import { storeUrl } from "@/lib/store-url";
 
 interface ProductCardProps {
   product: Product;
-  /**
-   * Mobile: when true, the card's second image is the visible slide.
-   * Driven by scroll progress at the grid level. Ignored on desktop (hover handles it).
-   */
-  isActive?: boolean;
 }
 
-export function ProductCard({ product, isActive = false }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const { artist } = useArtist();
 
   // Build image list: main image + up to 1 gallery image (max 2 total)
@@ -27,13 +23,55 @@ export function ProductCard({ product, isActive = false }: ProductCardProps) {
   }
   const hasMultipleImages = images.length > 1;
 
-  const activeIndex = hasMultipleImages && isActive ? 1 : 0;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const swipedRef = useRef(false);
 
   const href = storeUrl(artist, `/products/${product.id}`);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+    swipedRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      swipedRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (!hasMultipleImages) return;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      setActiveIndex(dx < 0 ? 1 : 0);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (swipedRef.current) {
+      e.preventDefault();
+      swipedRef.current = false;
+    }
+  };
+
   return (
-    <Link href={href} className="group block">
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
+    <Link href={href} className="group block" onClick={handleClick}>
+      <div
+        className="relative aspect-[4/5] w-full overflow-hidden bg-muted touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {images.length > 0 ? (
           <>
             {images.map((src, i) => {
