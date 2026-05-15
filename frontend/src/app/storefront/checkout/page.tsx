@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import { useCart } from "@/hooks/use-cart";
+import { useArtist } from "@/hooks/use-artist";
+import { storeUrl } from "@/lib/store-url";
 import { CheckoutForm } from "@/components/storefront/checkout-form";
 import { CartSummary } from "@/components/storefront/cart-summary";
 
 export default function CheckoutPage() {
   const { items, subtotal, itemCount, discount, discountedSubtotal } = useCart();
+  const { artist } = useArtist();
 
   if (items.length === 0) {
     return (
       <div className="px-4 py-24 pt-16 text-center md:px-12">
         <p className="text-muted-foreground">Your cart is empty.</p>
         <Link
-          href="/storefront"
+          href={storeUrl(artist)}
           className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.08em] underline"
         >
           Back to Store
@@ -43,7 +46,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             {/* Back to cart link */}
             <Link
-              href="/storefront/cart"
+              href={storeUrl(artist, "/cart")}
               className="mb-6 inline-block text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground"
             >
               &larr; Back to Cart

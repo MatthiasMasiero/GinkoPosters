@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useArtist } from "@/hooks/use-artist";
+import { storeSubpath, storeUrl } from "@/lib/store-url";
 
 export function StorefrontFooter() {
   const { artist } = useArtist();
   const pathname = usePathname();
-  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
-  const isProductPage = /^\/storefront\/products\//.test(pathname);
+  const isProductPage = storeSubpath(pathname, artist).startsWith("/products/");
 
   return (
     <footer
@@ -21,11 +21,11 @@ export function StorefrontFooter() {
             {artist?.name || "Store"}
           </p>
           <nav className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href={`/storefront${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">All Products</Link>
-            <Link href={`/storefront/cart${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Cart</Link>
-            <Link href={`/storefront/support${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Support</Link>
+            <Link href={storeUrl(artist)} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">All Products</Link>
+            <Link href={storeUrl(artist, "/cart")} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Cart</Link>
+            <Link href={storeUrl(artist, "/support")} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Support</Link>
             <Link href="/#collection" className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Artists</Link>
-            <Link href={`/storefront/legal${artistParam}`} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Legal</Link>
+            <Link href={storeUrl(artist, "/legal")} className="text-xs text-white/60 transition-colors duration-200 hover:text-white">Legal</Link>
           </nav>
           <span className="text-xs text-white/40">
             &copy; {new Date().getFullYear()} GinkoPosters

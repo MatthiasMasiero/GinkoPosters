@@ -7,6 +7,8 @@ import { api } from "@/lib/api-client";
 import { CheckCircle2 } from "lucide-react";
 import { FadeIn } from "@/components/landing/fade-in";
 import { Button } from "@/components/ui/button";
+import { useArtist } from "@/hooks/use-artist";
+import { storeUrl } from "@/lib/store-url";
 
 function humanStatus(status: string | null): string {
   switch (status) {
@@ -21,14 +23,12 @@ function humanStatus(status: string | null): string {
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
-  const artistSlug = searchParams.get("artist");
+  const { artist } = useArtist();
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const storeHref = artistSlug
-    ? `/storefront?artist=${artistSlug}`
-    : "/storefront";
+  const storeHref = storeUrl(artist);
 
   useEffect(() => {
     if (!orderId) {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/lib/types";
 import { useArtist } from "@/hooks/use-artist";
+import { storeUrl } from "@/lib/store-url";
 
 
 interface ProductCardProps {
@@ -28,9 +29,7 @@ export function ProductCard({ product, isActive = false }: ProductCardProps) {
 
   const activeIndex = hasMultipleImages && isActive ? 1 : 0;
 
-  const href = artist?.slug
-    ? `/storefront/products/${product.id}?artist=${artist.slug}`
-    : `/storefront/products/${product.id}`;
+  const href = storeUrl(artist, `/products/${product.id}`);
 
   return (
     <Link href={href} className="group block">

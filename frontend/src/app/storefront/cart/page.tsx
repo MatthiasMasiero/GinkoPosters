@@ -7,11 +7,11 @@ import { CartItemRow } from "@/components/storefront/cart-item";
 import { CartSummary } from "@/components/storefront/cart-summary";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { storeUrl } from "@/lib/store-url";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, subtotal, itemCount, isItemDiscounted, discount, discountedSubtotal } = useCart();
   const { artist } = useArtist();
-  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
 
   return (
     <div className="page-enter px-4 py-12 pt-16 md:px-12">
@@ -24,7 +24,7 @@ export default function CartPage() {
           <div className="mt-12 text-center">
             <p className="text-muted-foreground">Your cart is empty.</p>
             <Link
-              href={`/storefront${artistParam}`}
+              href={storeUrl(artist)}
               className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground underline transition-colors duration-200 hover:text-foreground"
             >
               Continue Shopping
@@ -49,7 +49,7 @@ export default function CartPage() {
               <Separator className="mt-2" />
 
               <Link
-                href={`/storefront${artistParam}`}
+                href={storeUrl(artist)}
                 className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors duration-200 hover:text-foreground hover:underline"
               >
                 &larr; Continue Shopping
@@ -60,7 +60,7 @@ export default function CartPage() {
             <div>
               <CartSummary subtotal={subtotal} discount={discount} discountedSubtotal={discountedSubtotal} itemCount={itemCount} />
               <Link
-                href={items.length > 0 ? `/storefront/checkout${artistParam}` : "#"}
+                href={items.length > 0 ? storeUrl(artist, "/checkout") : "#"}
                 className={`mt-4 block ${items.length === 0 ? "pointer-events-none" : ""}`}
                 aria-disabled={items.length === 0}
                 tabIndex={items.length === 0 ? -1 : undefined}

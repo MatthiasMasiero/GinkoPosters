@@ -22,6 +22,7 @@ import { SizeSelector } from "@/components/storefront/size-selector";
 import { Button } from "@/components/ui/button";
 import type { Product, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { storeUrl } from "@/lib/store-url";
 import { useRegion } from "@/hooks/use-region";
 
 function getGalleryImages(product: Product): { src: string; alt: string }[] {
@@ -136,9 +137,7 @@ export default function ProductDetailPage() {
     ? items.some((item) => item.product.artist_id === product.artist_id && item.product.id !== product.id)
     : false;
 
-  const backHref = artist?.slug
-    ? `/storefront?artist=${artist.slug}`
-    : "/storefront";
+  const backHref = storeUrl(artist);
 
   useEffect(() => {
     const id = params.id as string;

@@ -9,7 +9,7 @@ interface ArtistRoomProps {
 }
 
 export function ArtistRoom({ artist, products, roomNumber, visible }: ArtistRoomProps) {
-  const storeHref = `/storefront?artist=${artist.slug}`;
+  const storeHref = `/${artist.slug}`;
 
   // Pick up to 3 products with images for the wall mosaic
   const wallPosters = products
@@ -121,14 +121,6 @@ export function ArtistRoom({ artist, products, roomNumber, visible }: ArtistRoom
         <div className="absolute inset-0 bg-gradient-to-r from-[#0d0d0d]/60 via-transparent to-transparent pointer-events-none" />
       </div>
 
-      {/* Back to lobby */}
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="absolute left-6 top-6 text-[9px] uppercase tracking-[0.3em] text-white/20 transition-colors hover:text-white/60"
-        style={{ fontFamily: "Arial, sans-serif" }}
-      >
-        ← Lobby
-      </button>
     </section>
   );
 }

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/hooks/use-cart";
 import { useArtist } from "@/hooks/use-artist";
 import { api } from "@/lib/api-client";
+import { storeUrl } from "@/lib/store-url";
 
 const checkoutSchema = z.object({
   customer_name: z.string().min(2, "Name is required"),
@@ -77,7 +78,7 @@ export function CheckoutForm() {
         window.location.href = checkout_url;
       } else {
         clearCart();
-        router.push(`/storefront/order-confirmation?order_id=${order.id}${artist?.slug ? `&artist=${artist.slug}` : ""}`);
+        router.push(storeUrl(artist, `/order-confirmation?order_id=${order.id}`));
       }
     } catch (err) {
       setSubmitError(

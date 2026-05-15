@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { useArtist } from "@/hooks/use-artist";
+import { storeUrl } from "@/lib/store-url";
 import { FadeIn } from "@/components/landing/fade-in";
 
 interface MobileNavSidebarProps {
@@ -20,7 +21,6 @@ interface MobileNavSidebarProps {
 export function MobileNavSidebar({ children }: MobileNavSidebarProps) {
   const { itemCount } = useCart();
   const { artist } = useArtist();
-  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
 
   return (
     <Sheet>
@@ -45,7 +45,7 @@ export function MobileNavSidebar({ children }: MobileNavSidebarProps) {
           <FadeIn delay={100}>
             <SheetClose asChild>
               <Link
-                href={`/storefront${artistParam}`}
+                href={storeUrl(artist)}
                 className="min-h-[48px] px-8 py-6 text-4xl font-extrabold uppercase tracking-tight text-background transition-colors hover:text-background/60"
               >
                 Shop
@@ -55,7 +55,7 @@ export function MobileNavSidebar({ children }: MobileNavSidebarProps) {
           <FadeIn delay={200}>
             <SheetClose asChild>
               <Link
-                href={`/storefront/cart${artistParam}`}
+                href={storeUrl(artist, "/cart")}
                 className="flex min-h-[48px] items-center gap-3 px-8 py-6 text-4xl font-extrabold uppercase tracking-tight text-background transition-colors hover:text-background/60"
               >
                 Cart
@@ -70,7 +70,7 @@ export function MobileNavSidebar({ children }: MobileNavSidebarProps) {
           <FadeIn delay={300}>
             <SheetClose asChild>
               <Link
-                href={`/storefront/support${artistParam}`}
+                href={storeUrl(artist, "/support")}
                 className="min-h-[48px] px-8 py-6 text-4xl font-extrabold uppercase tracking-tight text-background transition-colors hover:text-background/60"
               >
                 Support

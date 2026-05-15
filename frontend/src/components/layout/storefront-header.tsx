@@ -6,6 +6,7 @@ import { Menu, ShoppingBag } from "lucide-react";
 import { useArtist } from "@/hooks/use-artist";
 import { useCart } from "@/hooks/use-cart";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { storeSubpath, storeUrl } from "@/lib/store-url";
 import { MobileNavSidebar } from "./mobile-nav-sidebar";
 
 export function StorefrontHeader() {
@@ -14,10 +15,9 @@ export function StorefrontHeader() {
   const { scrollDirection, isAtTop } = useScrollDirection();
   const pathname = usePathname();
 
-  const artistParam = artist?.slug ? `?artist=${artist.slug}` : "";
   const hidden = scrollDirection === "down" && !isAtTop;
   // Only use transparent/white header on the storefront home page (which has the hero)
-  const isHeroPage = pathname === "/storefront";
+  const isHeroPage = storeSubpath(pathname, artist) === "";
   const isOverHero = isAtTop && isHeroPage;
 
   return (
@@ -43,7 +43,7 @@ export function StorefrontHeader() {
 
       {/* Artist name */}
       <Link
-        href={`/storefront${artistParam}`}
+        href={storeUrl(artist)}
         className="text-sm font-extrabold uppercase tracking-[0.08em]"
       >
         {artist?.name || "Store"}
@@ -63,7 +63,7 @@ export function StorefrontHeader() {
           </span>
         </Link>
         <Link
-          href={`/storefront${artistParam}`}
+          href={storeUrl(artist)}
           className="group relative text-xs font-extrabold uppercase tracking-[0.08em] opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
           <span className="transition-opacity duration-200 group-hover:opacity-0">
@@ -74,7 +74,7 @@ export function StorefrontHeader() {
           </span>
         </Link>
         <Link
-          href={`/storefront/support${artistParam}`}
+          href={storeUrl(artist, "/support")}
           className="group relative text-xs font-extrabold uppercase tracking-[0.08em] opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
           <span className="transition-opacity duration-200 group-hover:opacity-0">
@@ -85,7 +85,7 @@ export function StorefrontHeader() {
           </span>
         </Link>
         <Link
-          href={`/storefront/cart${artistParam}`}
+          href={storeUrl(artist, "/cart")}
           aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
           className="relative opacity-70 transition-opacity duration-200 hover:opacity-100"
         >
@@ -100,7 +100,7 @@ export function StorefrontHeader() {
 
       {/* Mobile cart */}
       <Link
-        href={`/storefront/cart${artistParam}`}
+        href={storeUrl(artist, "/cart")}
         aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
         className="relative flex min-h-[44px] min-w-[44px] items-center justify-center md:hidden"
       >
