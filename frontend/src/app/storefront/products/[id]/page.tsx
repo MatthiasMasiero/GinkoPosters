@@ -89,7 +89,7 @@ function InfoAccordion({
 
 function ProductDetails({ description }: { description: string | null }) {
   return (
-    <div className="mt-8 border-t border-border">
+    <div className="mt-5 border-t border-border md:mt-8">
       <InfoAccordion
         icon={RefreshCw}
         title="Shipping"
@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
 
       {/* Main layout: images left, info right (sticky) */}
       <div className="mx-auto mt-8 max-w-7xl px-4 pb-24 md:px-12 md:pb-16">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
+        <div className="grid grid-cols-1 gap-5 md:gap-8 lg:grid-cols-[1fr_420px]">
           {/* Left: scrollable stacked images */}
           <FadeIn direction="up">
             <ImageGallery images={getGalleryImages(product)} />
@@ -228,8 +228,8 @@ export default function ProductDetailPage() {
 
             {/* Size selector */}
             <FadeIn direction="right" delay={200}>
-              <div className="mt-8">
-                <h3 className="mb-3 text-xs font-extrabold uppercase tracking-[0.08em]">
+              <div className="mt-5 md:mt-8">
+                <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] md:mb-3">
                   Size
                 </h3>
                 <SizeSelector
@@ -242,8 +242,8 @@ export default function ProductDetailPage() {
 
             {/* Quantity */}
             <FadeIn direction="right" delay={300}>
-              <div className="mt-8">
-                <h3 className="mb-3 text-xs font-extrabold uppercase tracking-[0.08em]">
+              <div className="mt-5 md:mt-8">
+                <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] md:mb-3">
                   Quantity
                 </h3>
                 <div className="flex items-center gap-3">

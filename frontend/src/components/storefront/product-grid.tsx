@@ -16,10 +16,9 @@ export function ProductGrid({ products }: ProductGridProps) {
 
   // Drive the active card from the page's scroll depth through the grid section.
   // Progress 0 → 1 spans from "grid top crosses viewport center" to
-  // "grid bottom crosses viewport center". The progress is split into N equal
-  // slices, one per card, so cards activate sequentially in DOM order
-  // (L1 → R1 → L2 → R2 …) as the user scrolls down. Mobile only — desktop
-  // keeps the hover behavior.
+  // "grid bottom crosses viewport center". The progress is split into one slice
+  // per row (2-col mobile grid), so both cards in a row activate together as
+  // the user scrolls down. Mobile only — desktop keeps the hover behavior.
   useEffect(() => {
     if (products.length === 0) return;
     const grid = gridRef.current;
@@ -62,18 +61,18 @@ export function ProductGrid({ products }: ProductGridProps) {
         setActiveIndex(-1);
         return;
       }
+      const COLS = 2;
+      const rowCount = Math.ceil(products.length / COLS);
+
       if (progress >= 1) {
-        // At the page-end cap: keep the last card active until they scroll back.
+        // At the page-end cap: keep the last row active until they scroll back.
         // Otherwise (user scrolled past the grid into footer/etc): deactivate.
-        setActiveIndex(cappedByPageEnd ? products.length - 1 : -1);
+        setActiveIndex(cappedByPageEnd ? (rowCount - 1) * COLS : -1);
         return;
       }
 
-      const idx = Math.min(
-        products.length - 1,
-        Math.floor(progress * products.length)
-      );
-      setActiveIndex(idx);
+      const activeRow = Math.min(rowCount - 1, Math.floor(progress * rowCount));
+      setActiveIndex(activeRow * COLS);
     };
 
     const onScroll = () => {
@@ -101,11 +100,15 @@ export function ProductGrid({ products }: ProductGridProps) {
 
   return (
     <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-4">
-      {products.map((product, index) => (
-        <FadeIn key={product.id} delay={index * 50}>
-          <ProductCard product={product} isActive={index === activeIndex} />
-        </FadeIn>
-      ))}
+      {products.map((product, index) => {
+        const isActive =
+          activeIndex >= 0 && Math.floor(index / 2) === Math.floor(activeIndex / 2);
+        return (
+          <FadeIn key={product.id} delay={index * 50}>
+            <ProductCard product={product} isActive={isActive} />
+          </FadeIn>
+        );
+      })}
     </div>
   );
 }

@@ -27,6 +27,22 @@ function StorefrontContent({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        // Slug routing on primary domain: middleware sets artist_slug cookie
+        // for paths like ginkoposters.com/madebygray
+        const cookies = document.cookie.split(";");
+        const slugCookie = cookies.find((c) =>
+          c.trim().startsWith("artist_slug=")
+        );
+        if (slugCookie) {
+          const slug = slugCookie.split("=")[1]?.trim();
+          if (slug) {
+            sessionStorage.setItem("artist_slug", slug);
+            const a = await api.artists.getBySlug(slug);
+            setArtist(a);
+            return;
+          }
+        }
+
         // Fallback: check sessionStorage for previously loaded artist slug
         const storedSlug = sessionStorage.getItem("artist_slug");
         if (storedSlug) {
@@ -35,8 +51,7 @@ function StorefrontContent({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Try reading from cookie (set by middleware for custom domains)
-        const cookies = document.cookie.split(";");
+        // Custom artist domain (e.g. madebygray.com): middleware sets artist_domain
         const domainCookie = cookies.find((c) =>
           c.trim().startsWith("artist_domain=")
         );

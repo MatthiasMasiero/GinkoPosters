@@ -1,22 +1,83 @@
 "use client";
 
 import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ImageGalleryProps {
   images: { src: string; alt: string }[];
 }
 
 export function ImageGallery({ images }: ImageGalleryProps) {
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeHeight, setActiveHeight] = useState<number | undefined>(undefined);
+
+  const measure = useCallback(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    const cRect = carousel.getBoundingClientRect();
+    const center = cRect.left + cRect.width / 2;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    slideRefs.current.forEach((slide, i) => {
+      if (!slide) return;
+      const r = slide.getBoundingClientRect();
+      const c = r.left + r.width / 2;
+      const d = Math.abs(c - center);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    });
+    const activeSlide = slideRefs.current[bestIdx];
+    const img = activeSlide?.querySelector("img");
+    if (img) {
+      const h = img.getBoundingClientRect().height;
+      if (h > 0) setActiveHeight(h);
+    }
+  }, []);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        measure();
+      });
+    };
+
+    measure();
+    carousel.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure);
+
+    return () => {
+      carousel.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [measure, images.length]);
+
   if (images.length === 0) return null;
 
   return (
     <>
-      {/* Mobile: horizontal scroll carousel, full-bleed */}
-      <div className="md:hidden -mx-4 flex snap-x snap-mandatory overflow-x-auto scrollbar-hide">
+      {/* Mobile: horizontal scroll carousel, height animates to match the centered slide */}
+      <div
+        ref={carouselRef}
+        className="md:hidden -mx-4 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden scrollbar-hide transition-[height] duration-300 ease-out"
+        style={{ height: activeHeight }}
+      >
         {images.map((img, i) => (
           <div
+            ref={(el) => {
+              slideRefs.current[i] = el;
+            }}
             key={img.src}
-            className="relative shrink-0 w-screen snap-center flex items-center justify-center"
+            className="relative shrink-0 w-screen snap-center self-start"
             onContextMenu={(e) => e.preventDefault()}
           >
             <Image
@@ -31,6 +92,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               onDragStart={(e) => e.preventDefault()}
               className="no-save-img w-full h-auto block"
               priority={i === 0}
+              onLoad={measure}
             />
           </div>
         ))}

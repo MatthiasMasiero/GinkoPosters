@@ -7,6 +7,14 @@ const PRIMARY_DOMAINS = (process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || "localhost")
 
 const SKIP_PREFIXES = ["/_next", "/api", "/favicon.ico", "/admin"];
 
+const RESERVED_TOP_LEVEL = new Set([
+  "storefront",
+  "robots.txt",
+  "sitemap.xml",
+  "icon.png",
+  "apple-icon.png",
+]);
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -29,8 +37,30 @@ export function middleware(request: NextRequest) {
     hostWithoutPort.endsWith(".vercel.app");
 
   if (isPrimary) {
-    // Primary domain: serve landing/main pages
-    const response = NextResponse.next();
+    const firstSegment = pathname.split("/")[1] || "";
+    const isReserved =
+      firstSegment === "" ||
+      RESERVED_TOP_LEVEL.has(firstSegment) ||
+      firstSegment.includes(".");
+
+    if (isReserved) {
+      const response = NextResponse.next();
+      response.cookies.set("user_country", country, {
+        path: "/",
+        sameSite: "lax",
+      });
+      return response;
+    }
+
+    // Treat first segment as artist slug: /madebygray/... → /storefront/...
+    const restPath = pathname.slice(firstSegment.length + 1);
+    const url = request.nextUrl.clone();
+    url.pathname = `/storefront${restPath}`;
+    const response = NextResponse.rewrite(url);
+    response.cookies.set("artist_slug", firstSegment, {
+      path: "/",
+      sameSite: "lax",
+    });
     response.cookies.set("user_country", country, {
       path: "/",
       sameSite: "lax",
