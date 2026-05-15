@@ -68,8 +68,8 @@ export function ImageGallery({ images }: ImageGalleryProps) {
       {/* Mobile: horizontal scroll carousel, height animates to match the centered slide */}
       <div
         ref={carouselRef}
-        className="md:hidden -mx-4 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden scrollbar-hide transition-[height] duration-300 ease-out"
-        style={{ height: activeHeight }}
+        className="md:hidden -mx-4 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain scrollbar-hide transition-[height] duration-300 ease-out"
+        style={{ height: activeHeight, scrollSnapType: "x mandatory" }}
       >
         {images.map((img, i) => (
           <div
@@ -77,7 +77,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               slideRefs.current[i] = el;
             }}
             key={img.src}
-            className="relative shrink-0 w-screen snap-center self-start"
+            className="relative shrink-0 w-screen snap-start snap-always self-start"
             onContextMenu={(e) => e.preventDefault()}
           >
             <Image
