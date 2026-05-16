@@ -7,6 +7,7 @@ import {
   getRegionalPrice,
   formatRegionalCurrency,
   getRegionConfig,
+  getDisplaySize,
 } from "@/lib/regional-pricing";
 
 interface RegionContextValue {
@@ -14,6 +15,7 @@ interface RegionContextValue {
   country: string;
   getPrice: (size: string) => number;
   formatPrice: (amount: number) => string;
+  getSizeLabel: (size: string) => string;
   currencySymbol: string;
 }
 
@@ -38,6 +40,7 @@ export function RegionProvider({ children }: { children: ReactNode }) {
 
   const getPrice = (size: string) => getRegionalPrice(region, size);
   const formatPrice = (amount: number) => formatRegionalCurrency(amount, region);
+  const getSizeLabel = (size: string) => getDisplaySize(size, region);
 
   return (
     <RegionContext.Provider
@@ -46,6 +49,7 @@ export function RegionProvider({ children }: { children: ReactNode }) {
         country,
         getPrice,
         formatPrice,
+        getSizeLabel,
         currencySymbol: config.currencySymbol,
       }}
     >

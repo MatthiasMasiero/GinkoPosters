@@ -263,3 +263,18 @@ export function getRegionalFreeShippingThreshold(region: Region): number {
   };
   return thresholds[region];
 }
+
+// US customers see imperial inch labels mapped 1:1 onto the internal
+// A-series size keys. variant.size stays A-series everywhere internal;
+// only the customer-facing label changes for the US region.
+export const US_SIZE_LABELS: Record<string, string> = {
+  A4: '12×18″',
+  A3: '16×24″',
+  A2: '20×30″',
+  A1: '24×36″',
+};
+
+export function getDisplaySize(size: string, region: Region): string {
+  if (region === 'US') return US_SIZE_LABELS[size] ?? size;
+  return size;
+}

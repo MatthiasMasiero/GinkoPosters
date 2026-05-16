@@ -20,7 +20,7 @@ export function CartItemRow({
   onUpdateQuantity,
   onRemove,
 }: CartItemProps) {
-  const { getPrice, formatPrice } = useRegion();
+  const { getPrice, formatPrice, getSizeLabel } = useRegion();
   const regionalPrice = getPrice(item.variant.size);
   const originalPrice = regionalPrice * item.quantity;
   const finalPrice = discounted
@@ -53,7 +53,7 @@ export function CartItemRow({
           {item.product.title}
         </h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          {item.variant.size}
+          {getSizeLabel(item.variant.size)}
         </p>
         {discounted && (
           <span className="mt-1 inline-block bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">

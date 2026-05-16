@@ -15,7 +15,7 @@ export function SizeSelector({
   selectedId,
   onSelect,
 }: SizeSelectorProps) {
-  const { getPrice, formatPrice } = useRegion();
+  const { getPrice, formatPrice, getSizeLabel } = useRegion();
 
   return (
     <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Size">
@@ -33,7 +33,7 @@ export function SizeSelector({
               : "border-border hover:border-foreground/50 hover:bg-muted"
           )}
         >
-          <span className="text-sm font-bold">{variant.size}</span>
+          <span className="text-sm font-bold">{getSizeLabel(variant.size)}</span>
           <span className="mt-1 text-sm">
             {formatPrice(getPrice(variant.size))}
           </span>
