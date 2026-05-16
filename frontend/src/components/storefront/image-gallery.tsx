@@ -16,7 +16,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         {images.map((img, i) => (
           <div
             key={img.src}
-            className="relative flex shrink-0 w-screen aspect-[4/5] items-center justify-center bg-[#e7e1d6]"
+            className="relative flex shrink-0 w-screen aspect-[4/5] items-center justify-center overflow-hidden bg-[#e7e1d6]"
             onContextMenu={(e) => e.preventDefault()}
           >
             <Image
@@ -28,7 +28,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               draggable={false}
               onContextMenu={(e) => e.preventDefault()}
               onDragStart={(e) => e.preventDefault()}
-              className={`no-save-img ${i === 0 ? "object-cover" : "object-contain"}`}
+              className="no-save-img object-contain"
               priority={i === 0}
             />
           </div>
