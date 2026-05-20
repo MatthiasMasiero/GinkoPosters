@@ -9,6 +9,7 @@ from src.artists.models import Artist
 from src.config import settings
 from src.emails.service import send_order_confirmation
 from src.orders.service import get_order_by_id, get_order_by_stripe_session
+from src.payments.shipping_config import get_shipping_fee
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -50,17 +51,21 @@ async def create_checkout_session(
             }
         )
 
-    # Add flat-rate shipping
-    line_items.append(
-        {
-            "price_data": {
-                "currency": "eur",
-                "unit_amount": int(settings.SHIPPING_COST_EUR * 100),
-                "product_data": {"name": "Shipping"},
-            },
-            "quantity": 1,
-        }
-    )
+    # Shipping: free for the explicit destination countries we ship to,
+    # flat fee for everywhere else. Skip the Stripe line item entirely when
+    # shipping is free so the customer doesn't see a "Shipping: 0.00" row.
+    shipping_fee = get_shipping_fee(order.shipping_country)
+    if shipping_fee > 0:
+        line_items.append(
+            {
+                "price_data": {
+                    "currency": "eur",
+                    "unit_amount": int(round(shipping_fee * 100)),
+                    "product_data": {"name": "Shipping"},
+                },
+                "quantity": 1,
+            }
+        )
 
     # Build store URL prefix from artist slug so Stripe redirects land on the
     # clean /{slug}/... pattern instead of the legacy /storefront route.

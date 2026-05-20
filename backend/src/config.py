@@ -45,9 +45,6 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str = "re_placeholder"
     FROM_EMAIL: str = "Ginko Posters <noreply@ginkoposters.com>"
 
-    # Shipping
-    SHIPPING_COST_EUR: float = 5.99
-
     # Discount
     MULTI_ITEM_DISCOUNT_RATE: float = 0.15
 
