@@ -11,12 +11,12 @@ export function ImageGallery({ images }: ImageGalleryProps) {
 
   return (
     <>
-      {/* Mobile: smooth horizontal scroll, fixed-ratio slides with warm sand letterbox fill */}
-      <div className="md:hidden -mx-4 flex overflow-x-auto overflow-y-hidden overscroll-x-contain scrollbar-hide">
+      {/* Mobile: snap-locked horizontal swipe, uniform square slides with white letterbox */}
+      <div className="md:hidden -mx-4 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain scrollbar-hide">
         {images.map((img, i) => (
           <div
             key={img.src}
-            className="relative flex shrink-0 w-screen aspect-[4/5] items-center justify-center overflow-hidden bg-[#e7e1d6]"
+            className="relative flex shrink-0 w-screen aspect-square snap-start snap-always items-center justify-center overflow-hidden bg-white"
             onContextMenu={(e) => e.preventDefault()}
           >
             <Image
