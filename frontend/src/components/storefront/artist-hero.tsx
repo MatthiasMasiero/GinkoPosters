@@ -204,6 +204,17 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
             className="object-cover"
           />
         </div>
+      ) : allImages.length === 1 ? (
+        <div className="absolute inset-0">
+          <Image
+            src={allImages[0].src}
+            alt={allImages[0].alt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
       ) : hasImages ? (
         <div className="absolute inset-0">
           {/* Desktop mosaic: asymmetric editorial grid */}

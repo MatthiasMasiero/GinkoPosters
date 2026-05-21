@@ -67,7 +67,19 @@ export function ArtistRoom({ artist, products, roomNumber, visible }: ArtistRoom
 
       {/* Right: poster mosaic wall */}
       <div className="relative min-h-[50vh] overflow-hidden border-t border-white/[0.04] lg:border-t-0 lg:border-l">
-        {wallPosters.length > 0 ? (
+        {wallPosters.length === 1 ? (
+          <div className="absolute inset-0 p-10">
+            <div className="relative h-full w-full overflow-hidden">
+              <Image
+                src={wallPosters[0].image_url!}
+                alt={wallPosters[0].title}
+                fill
+                sizes="50vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+        ) : wallPosters.length > 0 ? (
           <div
             className="absolute inset-0 grid gap-[3px] p-10"
             style={{
