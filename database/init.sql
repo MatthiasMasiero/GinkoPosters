@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS artists (
     secondary_color VARCHAR(7) NOT NULL DEFAULT '#FFFFFF',
     bio TEXT,
     logo_url VARCHAR(500),
+    hero_image_url VARCHAR(500),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()

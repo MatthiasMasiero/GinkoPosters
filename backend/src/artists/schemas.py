@@ -12,6 +12,7 @@ class ArtistBase(BaseModel):
     secondary_color: str = Field(default="#FFFFFF", max_length=7, pattern=r"^#[0-9a-fA-F]{6}$")
     bio: str | None = Field(default=None, max_length=2000)
     logo_url: str | None = Field(default=None, max_length=500)
+    hero_image_url: str | None = Field(default=None, max_length=500)
 
 
 class ArtistCreate(ArtistBase):
@@ -26,6 +27,7 @@ class ArtistUpdate(BaseModel):
     secondary_color: str | None = Field(default=None, max_length=7, pattern=r"^#[0-9a-fA-F]{6}$")
     bio: str | None = Field(default=None, max_length=2000)
     logo_url: str | None = Field(default=None, max_length=500)
+    hero_image_url: str | None = Field(default=None, max_length=500)
     is_active: bool | None = None
 
 
@@ -47,6 +49,7 @@ class ArtistPublicResponse(BaseModel):
     secondary_color: str
     bio: str | None
     logo_url: str | None
+    hero_image_url: str | None
     is_active: bool
 
     model_config = {"from_attributes": True}

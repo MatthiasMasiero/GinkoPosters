@@ -4,9 +4,9 @@ INSERT INTO users (id, email, password_hash, role) VALUES
   (uuid_generate_v4(), 'admin@ginkoposters.com', '$2b$12$CRWX7GJvnjngUhtweramV.ozlcxf3WONOBHWpw1IeUwL/HXQsMQFm', 'admin');
 
 -- Artists
-INSERT INTO artists (id, name, slug, domain, primary_color, secondary_color, bio, is_active) VALUES
-  ('a3333333-3333-3333-3333-333333333333', 'MadeByGray', 'madebygray', 'madebygray.local', '#2D2D2D', '#C0C0C0', 'Bold, culture-driven poster art blending fashion, music, and street aesthetics.', true),
-  ('a4444444-4444-4444-4444-444444444444', 'Laz Lewis', 'laz-lewis', 'lazlewis.local', '#0E4B6E', '#E8D5B7', 'Coastal photography from quiet shores and slow afternoons. Laz Lewis frames the ocean, sun, and stillness in honest, light-drenched portraits of travel.', true);
+INSERT INTO artists (id, name, slug, domain, primary_color, secondary_color, bio, hero_image_url, is_active) VALUES
+  ('a3333333-3333-3333-3333-333333333333', 'MadeByGray', 'madebygray', 'madebygray.local', '#2D2D2D', '#C0C0C0', 'Bold, culture-driven poster art blending fashion, music, and street aesthetics.', NULL, true),
+  ('a4444444-4444-4444-4444-444444444444', 'Laz Lewis', 'laz-lewis', 'lazlewis.local', '#0E4B6E', '#E8D5B7', 'Coastal photography from quiet shores and slow afternoons. Laz Lewis frames the ocean, sun, and stillness in honest, light-drenched portraits of travel.', '/images/laz-lewis/starfish.jpg', true);
 
 -- Products for MadeByGray
 INSERT INTO products (id, artist_id, title, slug, description, image_url, is_active) VALUES

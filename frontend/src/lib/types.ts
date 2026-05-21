@@ -7,6 +7,7 @@ export interface Artist {
   secondary_color: string;
   bio: string | null;
   logo_url: string | null;
+  hero_image_url: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
