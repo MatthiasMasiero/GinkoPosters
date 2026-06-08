@@ -15,11 +15,13 @@ export function SizeSelector({
   selectedId,
   onSelect,
 }: SizeSelectorProps) {
-  const { getPrice, formatPrice, getSizeLabel } = useRegion();
+  const { getPrice, formatPrice, getSizeLabel, filterVariants } = useRegion();
+
+  const displayVariants = filterVariants(variants);
 
   return (
     <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Size">
-      {variants.map((variant) => (
+      {displayVariants.map((variant) => (
         <button
           key={variant.id}
           type="button"
@@ -35,7 +37,7 @@ export function SizeSelector({
         >
           <span className="text-sm font-bold">{getSizeLabel(variant.size)}</span>
           <span className="mt-1 text-sm">
-            {formatPrice(getPrice(variant.size))}
+            {formatPrice(getPrice(variant.price))}
           </span>
         </button>
       ))}

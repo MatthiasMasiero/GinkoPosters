@@ -124,7 +124,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const { addItem, items } = useCart();
   const { artist } = useArtist();
-  const { getPrice, formatPrice } = useRegion();
+  const { getPrice, formatPrice, filterVariants } = useRegion();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     null
@@ -145,12 +145,14 @@ export default function ProductDetailPage() {
       .get(id)
       .then((p) => {
         setProduct(p);
-        if (p.variants.length > 0) {
-          setSelectedVariant(p.variants[0]);
+        const regionVariants = filterVariants(p.variants);
+        if (regionVariants.length > 0) {
+          setSelectedVariant(regionVariants[0]);
         }
       })
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   function handleAddToCart() {
@@ -316,7 +318,7 @@ export default function ProductDetailPage() {
               Added to Cart
             </>
           ) : selectedVariant ? (
-            `Add to Cart — ${formatPrice(getPrice(selectedVariant.size))}`
+            `Add to Cart — ${formatPrice(getPrice(selectedVariant.price))}`
           ) : (
             "Select a Size"
           )}

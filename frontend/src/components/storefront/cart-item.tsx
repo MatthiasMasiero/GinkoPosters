@@ -21,7 +21,7 @@ export function CartItemRow({
   onRemove,
 }: CartItemProps) {
   const { getPrice, formatPrice, getSizeLabel } = useRegion();
-  const regionalPrice = getPrice(item.variant.size);
+  const regionalPrice = getPrice(item.variant.price);
   const originalPrice = regionalPrice * item.quantity;
   const finalPrice = discounted
     ? originalPrice * (1 - MULTI_ITEM_DISCOUNT_RATE)

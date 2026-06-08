@@ -1,5 +1,6 @@
 // Regional pricing configuration
-// GBP prices from spreadsheet, converted to local currencies
+// Prices are stored in the database (EUR) and converted to local currencies
+// using the rates below. Admin dashboard controls the base EUR price.
 
 export type Region =
   | 'UK'
@@ -16,7 +17,8 @@ export interface RegionConfig {
   currency: string;
   currencySymbol: string;
   locale: string;
-  prices: Record<string, number>;
+  /** Multiplier to convert from EUR (DB price) to this region's currency */
+  conversionRate: number;
 }
 
 // Helper: round to 2 decimal places
@@ -24,142 +26,66 @@ function r2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-// GBP → EUR rate: 1.17
-// GBP → USD rate: 1.34 (used for Sheet 2 USD prices)
-// USD → CAD rate: 1.36
-// USD → AUD rate: 1.53
+// Conversion rates FROM EUR (the DB/Stripe currency)
+// EUR → GBP: 0.855 (1/1.17)
+// EUR → USD: 1.145 (1.34/1.17)
+// EUR → CAD: 1.557 (USD × 1.36)
+// EUR → AUD: 1.752 (USD × 1.53)
 
 export const REGIONAL_PRICING: Record<Region, RegionConfig> = {
   UK: {
     currency: 'GBP',
     currencySymbol: '£',
     locale: 'en-GB',
-    prices: {
-      A5: 9.98,
-      A4: 10.98,
-      A3: 14.98,
-      A2: 17.98,
-      A1: 22.98,
-      A0: 31.98,
-    },
+    conversionRate: 0.855, // EUR → GBP
   },
   DE: {
     currency: 'EUR',
     currencySymbol: '€',
     locale: 'de-DE',
-    // GBP prices: A5=15.98, A4=12.98, A3=16.98, A2=17.98, A1=22.98, A0=45.98
-    // Converted GBP × 1.17
-    prices: {
-      A5: r2(15.98 * 1.17),
-      A4: r2(12.98 * 1.17),
-      A3: r2(16.98 * 1.17),
-      A2: r2(17.98 * 1.17),
-      A1: r2(22.98 * 1.17),
-      A0: r2(45.98 * 1.17),
-    },
+    conversionRate: 1.0, // already EUR
   },
   FR_ES: {
     currency: 'EUR',
     currencySymbol: '€',
     locale: 'fr-FR',
-    // GBP prices: A5=16.98, A4=17.98, A3=19.98, A2=22.98, A1=28.98, A0=45.98
-    // Converted GBP × 1.17
-    prices: {
-      A5: r2(16.98 * 1.17),
-      A4: r2(17.98 * 1.17),
-      A3: r2(19.98 * 1.17),
-      A2: r2(22.98 * 1.17),
-      A1: r2(28.98 * 1.17),
-      A0: r2(45.98 * 1.17),
-    },
+    conversionRate: 1.0,
   },
   EU_WEST: {
     currency: 'EUR',
     currencySymbol: '€',
     locale: 'de-DE',
-    // GBP prices: A5=17.98, A4=18.98, A3=19.98, A2=22.98, A1=28.98, A0=43.98
-    // Converted GBP × 1.17
-    prices: {
-      A5: r2(17.98 * 1.17),
-      A4: r2(18.98 * 1.17),
-      A3: r2(19.98 * 1.17),
-      A2: r2(22.98 * 1.17),
-      A1: r2(28.98 * 1.17),
-      A0: r2(43.98 * 1.17),
-    },
+    conversionRate: 1.0,
   },
   EU_EAST: {
     currency: 'EUR',
     currencySymbol: '€',
     locale: 'de-DE',
-    // GBP prices: A5=18.98, A4=21.98, A3=22.98, A2=27.98, A1=35.98, A0=49.98
-    // Converted GBP × 1.17
-    prices: {
-      A5: r2(18.98 * 1.17),
-      A4: r2(21.98 * 1.17),
-      A3: r2(22.98 * 1.17),
-      A2: r2(27.98 * 1.17),
-      A1: r2(35.98 * 1.17),
-      A0: r2(49.98 * 1.17),
-    },
+    conversionRate: 1.0,
   },
   US: {
     currency: 'USD',
     currencySymbol: '$',
     locale: 'en-US',
-    // USD prices from Sheet 2 (GBP × 1.34)
-    prices: {
-      A5: 15.98,
-      A4: 16.98,
-      A3: 17.98,
-      A2: 19.98,
-      A1: 27.98,
-      A0: 59.98,
-    },
+    conversionRate: 1.145, // EUR → USD
   },
   CA: {
     currency: 'CAD',
     currencySymbol: 'C$',
     locale: 'en-CA',
-    // USD prices for Canada row (GBP × 1.34): A5=26.77, A4=29.45, A3=32.13, A2=37.49, A1=48.21, A0=72.31
-    // Then USD × 1.36 for CAD
-    prices: {
-      A5: r2(r2(19.98 * 1.34) * 1.36),
-      A4: r2(r2(21.98 * 1.34) * 1.36),
-      A3: r2(r2(23.98 * 1.34) * 1.36),
-      A2: r2(r2(27.98 * 1.34) * 1.36),
-      A1: r2(r2(35.98 * 1.34) * 1.36),
-      A0: r2(r2(53.98 * 1.34) * 1.36),
-    },
+    conversionRate: 1.557, // EUR → CAD
   },
   AU: {
     currency: 'AUD',
     currencySymbol: 'A$',
     locale: 'en-AU',
-    // USD prices for Australia row (GBP × 1.34): A5=24.09, A4=24.09, A3=26.77, A2=30.79, A1=36.15, A0=45.53
-    // Then USD × 1.53 for AUD
-    prices: {
-      A5: r2(r2(17.98 * 1.34) * 1.53),
-      A4: r2(r2(17.98 * 1.34) * 1.53),
-      A3: r2(r2(19.98 * 1.34) * 1.53),
-      A2: r2(r2(22.98 * 1.34) * 1.53),
-      A1: r2(r2(26.98 * 1.34) * 1.53),
-      A0: r2(r2(33.98 * 1.34) * 1.53),
-    },
+    conversionRate: 1.752, // EUR → AUD
   },
   WORLD: {
     currency: 'USD',
     currencySymbol: '$',
     locale: 'en-US',
-    // USD prices from Sheet 2 for World/fallback row (same GBP as UK)
-    prices: {
-      A5: 13.37,
-      A4: 14.71,
-      A3: 20.07,
-      A2: 24.09,
-      A1: 30.79,
-      A0: 42.85,
-    },
+    conversionRate: 1.145, // EUR → USD (same as US)
   },
 } as const;
 
@@ -215,9 +141,14 @@ export function getRegionFromCountry(countryCode: string): Region {
   return COUNTRY_TO_REGION[countryCode.toUpperCase()] ?? 'WORLD';
 }
 
-export function getRegionalPrice(region: Region, size: string): number {
+/**
+ * Convert a base EUR price (from the database) to the regional currency.
+ * This is the single source of truth for display prices — admin sets
+ * variant.price in the dashboard, and this function converts it.
+ */
+export function convertToRegionalPrice(eurPrice: number, region: Region): number {
   const config = REGIONAL_PRICING[region];
-  return config.prices[size] ?? 0;
+  return r2(eurPrice * config.conversionRate);
 }
 
 export function formatRegionalCurrency(amount: number, region: Region): string {
@@ -234,17 +165,38 @@ export function getRegionConfig(region: Region): RegionConfig {
   return REGIONAL_PRICING[region];
 }
 
-// US customers see imperial inch labels mapped 1:1 onto the internal
-// A-series size keys. variant.size stays A-series everywhere internal;
-// only the customer-facing label changes for the US region.
-export const US_SIZE_LABELS: Record<string, string> = {
-  A4: '12×18″',
-  A3: '16×24″',
-  A2: '20×30″',
-  A1: '24×36″',
+// Imperial size labels for display purposes.
+// Imperial sizes are stored as separate variants (e.g. "12x18") with their own SKUs.
+// A-series sizes are shown as-is (e.g. "A4", "A1").
+export const IMPERIAL_SIZE_LABELS: Record<string, string> = {
+  '12x18': '12×18″',
+  '16x24': '16×24″',
+  '20x30': '20×30″',
+  '24x36': '24×36″',
 };
 
+// Which sizes belong to which region type
+export const METRIC_SIZES = ['A5', 'A4', 'A3', 'A2', 'A1', 'A0'];
+export const IMPERIAL_SIZES = ['12x18', '16x24', '20x30', '24x36'];
+
+export function isImperialSize(size: string): boolean {
+  return IMPERIAL_SIZES.includes(size);
+}
+
+export function isMetricSize(size: string): boolean {
+  return METRIC_SIZES.includes(size);
+}
+
 export function getDisplaySize(size: string, region: Region): string {
-  if (region === 'US') return US_SIZE_LABELS[size] ?? size;
+  if (isImperialSize(size)) return IMPERIAL_SIZE_LABELS[size] ?? size;
   return size;
+}
+
+/**
+ * Filter variants to show only the appropriate sizes for the region.
+ * US/CA/AU see imperial sizes, everyone else sees A-series.
+ */
+export function getRegionSizes(region: Region): 'imperial' | 'metric' {
+  if (region === 'US' || region === 'CA' || region === 'AU') return 'imperial';
+  return 'metric';
 }

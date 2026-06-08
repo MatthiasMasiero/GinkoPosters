@@ -26,7 +26,17 @@ interface VariantRow {
   cost_price: string;
 }
 
-const SIZES = ["A4", "A3", "A2", "A1"];
+const METRIC_SIZES = ["A5", "A4", "A3", "A2", "A1", "A0"];
+const IMPERIAL_SIZES = [
+  { value: "12x18", label: '12×18″' },
+  { value: "16x24", label: '16×24″' },
+  { value: "20x30", label: '20×30″' },
+  { value: "24x36", label: '24×36″' },
+];
+const ALL_SIZES = [
+  ...METRIC_SIZES.map((s) => ({ value: s, label: s })),
+  ...IMPERIAL_SIZES,
+];
 
 function slugify(text: string) {
   return text
@@ -62,7 +72,7 @@ export function ProductForm({ product }: ProductFormProps) {
       sku: v.sku,
       price: String(v.price),
       cost_price: String(v.cost_price),
-    })) || [{ size: "A3", sku: "", price: "", cost_price: "" }]
+    })) || [{ size: "A4", sku: "", price: "", cost_price: "" }]
   );
 
   useEffect(() => {
@@ -78,7 +88,7 @@ export function ProductForm({ product }: ProductFormProps) {
   function addVariant() {
     setVariants((prev) => [
       ...prev,
-      { size: "A3", sku: "", price: "", cost_price: "" },
+      { size: "A4", sku: "", price: "", cost_price: "" },
     ]);
   }
 
@@ -262,7 +272,7 @@ export function ProductForm({ product }: ProductFormProps) {
             key={index}
             className="flex items-end gap-3 rounded-md border p-3"
           >
-            <div className="w-24">
+            <div className="w-28">
               <Label className="text-xs">Size</Label>
               <Select
                 value={variant.size}
@@ -272,9 +282,9 @@ export function ProductForm({ product }: ProductFormProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {SIZES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
+                  {ALL_SIZES.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -289,7 +299,7 @@ export function ProductForm({ product }: ProductFormProps) {
               />
             </div>
             <div className="w-28">
-              <Label className="text-xs">Price</Label>
+              <Label className="text-xs">Price (EUR)</Label>
               <Input
                 type="number"
                 step="0.01"

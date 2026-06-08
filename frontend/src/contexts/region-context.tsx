@@ -4,18 +4,25 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import {
   type Region,
   getRegionFromCountry,
-  getRegionalPrice,
+  convertToRegionalPrice,
   formatRegionalCurrency,
   getRegionConfig,
   getDisplaySize,
+  getRegionSizes,
+  isImperialSize,
+  isMetricSize,
 } from "@/lib/regional-pricing";
+import type { ProductVariant } from "@/lib/types";
 
 interface RegionContextValue {
   region: Region;
   country: string;
-  getPrice: (size: string) => number;
+  /** Convert a variant's EUR price to the regional display price */
+  getPrice: (variantPrice: number) => number;
   formatPrice: (amount: number) => string;
   getSizeLabel: (size: string) => string;
+  /** Filter variants to only those appropriate for this region */
+  filterVariants: (variants: ProductVariant[]) => ProductVariant[];
   currencySymbol: string;
 }
 
@@ -37,10 +44,19 @@ export function RegionProvider({ children }: { children: ReactNode }) {
 
   const region = getRegionFromCountry(country);
   const config = getRegionConfig(region);
+  const sizeType = getRegionSizes(region);
 
-  const getPrice = (size: string) => getRegionalPrice(region, size);
+  const getPrice = (variantPrice: number) => convertToRegionalPrice(variantPrice, region);
   const formatPrice = (amount: number) => formatRegionalCurrency(amount, region);
   const getSizeLabel = (size: string) => getDisplaySize(size, region);
+
+  const filterVariants = (variants: ProductVariant[]) => {
+    const filterFn = sizeType === 'imperial' ? isImperialSize : isMetricSize;
+    const filtered = variants.filter((v) => filterFn(v.size));
+    // Fallback: if no variants match the region type, show all (handles
+    // products that only have one size type set up)
+    return filtered.length > 0 ? filtered : variants;
+  };
 
   return (
     <RegionContext.Provider
@@ -50,6 +66,7 @@ export function RegionProvider({ children }: { children: ReactNode }) {
         getPrice,
         formatPrice,
         getSizeLabel,
+        filterVariants,
         currencySymbol: config.currencySymbol,
       }}
     >

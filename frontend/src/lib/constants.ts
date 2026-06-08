@@ -19,6 +19,18 @@ export const POSTER_SIZES = [
   { label: "A0", width_cm: 84.1, height_cm: 118.9 },
 ] as const;
 
+export const IMPERIAL_POSTER_SIZES = [
+  { label: "12x18", display: '12×18″', width_in: 12, height_in: 18 },
+  { label: "16x24", display: '16×24″', width_in: 16, height_in: 24 },
+  { label: "20x30", display: '20×30″', width_in: 20, height_in: 30 },
+  { label: "24x36", display: '24×36″', width_in: 24, height_in: 36 },
+] as const;
+
+export const ALL_POSTER_SIZES = [
+  ...POSTER_SIZES.map((s) => ({ label: s.label, display: s.label })),
+  ...IMPERIAL_POSTER_SIZES.map((s) => ({ label: s.label, display: s.display })),
+] as const;
+
 export const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
   paid: "bg-blue-100 text-blue-800",

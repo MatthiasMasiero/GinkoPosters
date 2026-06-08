@@ -33,7 +33,13 @@ async def create_checkout_session(
         product_title = "Poster"
         size_label = ""
         if hasattr(item, "variant") and item.variant:
-            size_label = item.variant.size or ""
+            raw_size = item.variant.size or ""
+            # Format imperial sizes nicely (e.g. "12x18" → "12×18″")
+            if "x" in raw_size and raw_size.replace("x", "").isdigit():
+                parts = raw_size.split("x")
+                size_label = f"{parts[0]}×{parts[1]}″"
+            else:
+                size_label = raw_size
             if hasattr(item.variant, "product") and item.variant.product:
                 product_title = item.variant.product.title
         name = f"{product_title} — {size_label}" if size_label else product_title

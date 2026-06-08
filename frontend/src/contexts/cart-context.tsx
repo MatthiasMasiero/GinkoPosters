@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { CartItem, Product, ProductVariant } from "@/lib/types";
 import { MULTI_ITEM_DISCOUNT_RATE } from "@/lib/constants";
-import { getRegionFromCountry, getRegionalPrice } from "@/lib/regional-pricing";
+import { getRegionFromCountry, convertToRegionalPrice } from "@/lib/regional-pricing";
 
 interface CartContextValue {
   items: CartItem[];
@@ -107,7 +107,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const subtotal = items.reduce(
     (sum, item) => {
-      const price = getRegionalPrice(region, item.variant.size);
+      const price = convertToRegionalPrice(item.variant.price, region);
       return sum + price * item.quantity;
     },
     0
@@ -128,7 +128,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const discount = items.reduce((sum, item) => {
     if (discountedArtists.has(item.product.artist_id)) {
-      const price = getRegionalPrice(region, item.variant.size);
+      const price = convertToRegionalPrice(item.variant.price, region);
       return sum + price * item.quantity * MULTI_ITEM_DISCOUNT_RATE;
     }
     return sum;
