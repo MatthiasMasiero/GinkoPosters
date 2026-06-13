@@ -96,20 +96,35 @@ async def update_product(
     for field, value in update_data.items():
         setattr(product, field, value)
 
-    # Sync variants if provided: replace all existing variants
+    # Sync variants if provided. Match on SKU and update matched rows IN PLACE
+    # so price/cost edits never change a variant's id — that would orphan live
+    # carts and break the order_items FK for any variant that's been sold.
     if new_variants is not None:
+        existing_by_sku = {v.sku: v for v in product.variants}
+        incoming_skus = {v["sku"] for v in new_variants}
+
+        # Remove variants the admin dropped from the payload.
         for old_variant in product.variants:
-            await db.delete(old_variant)
-        await db.flush()
+            if old_variant.sku not in incoming_skus:
+                await db.delete(old_variant)
+
+        # Update existing variants in place; insert genuinely new SKUs.
         for v_data in new_variants:
-            variant = ProductVariant(
-                product_id=product.id,
-                size=v_data["size"],
-                sku=v_data["sku"],
-                price=v_data["price"],
-                cost_price=v_data["cost_price"],
-            )
-            db.add(variant)
+            existing = existing_by_sku.get(v_data["sku"])
+            if existing is not None:
+                existing.size = v_data["size"]
+                existing.price = v_data["price"]
+                existing.cost_price = v_data["cost_price"]
+            else:
+                db.add(
+                    ProductVariant(
+                        product_id=product.id,
+                        size=v_data["size"],
+                        sku=v_data["sku"],
+                        price=v_data["price"],
+                        cost_price=v_data["cost_price"],
+                    )
+                )
 
     await db.flush()
     await db.refresh(product)

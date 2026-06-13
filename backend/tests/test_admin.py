@@ -202,7 +202,7 @@ class TestArtistCRUD:
         await artist_factory(name="Visible Artist", is_active=True)
         await artist_factory(name="Hidden Artist", is_active=False)
 
-        resp = await client.get("/api/v1/artists/")
+        resp = await client.get("/api/v1/artists")
         assert resp.status_code == 200
 
         data = resp.json()
@@ -345,6 +345,74 @@ class TestProductCRUD:
             headers=admin_headers,
         )
         assert resp.status_code == 404
+
+    async def test_update_variant_price_updates_in_place(
+        self,
+        client: AsyncClient,
+        admin_headers,
+        artist_factory,
+        product_factory,
+        variant_factory,
+    ):
+        """Changing a variant's price must update the existing row in place
+        (same id), not delete-and-recreate it."""
+        artist = await artist_factory()
+        product = await product_factory(artist.id)
+        variant = await variant_factory(
+            product.id, size="A3", sku="KEEP-001", price=29.99, cost_price=8.50
+        )
+        original_id = str(variant.id)
+
+        resp = await client.put(
+            f"/api/v1/admin/products/{product.id}",
+            json={
+                "variants": [
+                    {"size": "A3", "sku": "KEEP-001", "price": 34.99, "cost_price": 8.50}
+                ]
+            },
+            headers=admin_headers,
+        )
+
+        assert resp.status_code == 200
+        variants = resp.json()["variants"]
+        assert len(variants) == 1
+        assert variants[0]["price"] == 34.99
+        assert variants[0]["id"] == original_id  # same row, updated in place
+
+    async def test_update_variant_price_with_existing_order(
+        self,
+        client: AsyncClient,
+        admin_headers,
+        artist_factory,
+        product_factory,
+        variant_factory,
+        order_factory,
+    ):
+        """A variant that has already been ordered can still have its price
+        changed, and the variant the order references stays intact."""
+        artist = await artist_factory()
+        product = await product_factory(artist.id)
+        variant = await variant_factory(
+            product.id, size="A2", sku="SOLD-001", price=39.99, cost_price=10.0
+        )
+        original_id = str(variant.id)
+        await order_factory(artist.id, [variant])
+
+        resp = await client.put(
+            f"/api/v1/admin/products/{product.id}",
+            json={
+                "variants": [
+                    {"size": "A2", "sku": "SOLD-001", "price": 44.99, "cost_price": 10.0}
+                ]
+            },
+            headers=admin_headers,
+        )
+
+        assert resp.status_code == 200
+        variants = resp.json()["variants"]
+        assert len(variants) == 1
+        assert variants[0]["id"] == original_id
+        assert variants[0]["price"] == 44.99
 
     async def test_public_product_excludes_cost_price_and_sku(
         self, client: AsyncClient, artist_factory, product_factory, variant_factory
