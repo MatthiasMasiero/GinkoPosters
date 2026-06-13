@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useArtist } from "@/hooks/use-artist";
 import { api } from "@/lib/api-client";
+import { withRetry } from "@/lib/retry";
 import { FadeIn } from "@/components/landing/fade-in";
 import { ArtistHero } from "@/components/storefront/artist-hero";
 import { ProductGrid } from "@/components/storefront/product-grid";
@@ -12,18 +13,29 @@ export default function StorefrontHomePage() {
   const { artist } = useArtist();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const loadProducts = useCallback(async () => {
     if (!artist) {
       setLoading(false);
       return;
     }
-    api.artists
-      .getProducts(artist.id)
-      .then((prods) => setProducts(prods.filter((p) => p.is_active)))
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false));
+    setLoading(true);
+    setError(false);
+    try {
+      const prods = await withRetry(() => api.artists.getProducts(artist.id));
+      setProducts(prods.filter((p) => p.is_active));
+    } catch {
+      // Don't show an empty "No products" grid on a transient fetch failure.
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }, [artist]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   return (
     <>
@@ -57,6 +69,18 @@ export default function StorefrontHomePage() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="aspect-[4/5] w-full bg-muted" />
             ))}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center gap-6 py-16 text-center">
+            <p className="text-sm text-muted-foreground">
+              We couldn&apos;t load the collection. Please try again.
+            </p>
+            <button
+              onClick={() => loadProducts()}
+              className="border border-foreground px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-opacity hover:opacity-70"
+            >
+              Try again
+            </button>
           </div>
         ) : (
           <ProductGrid products={products} />
