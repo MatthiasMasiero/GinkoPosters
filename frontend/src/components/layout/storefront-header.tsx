@@ -25,11 +25,9 @@ export function StorefrontHeader() {
       className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12"
       style={{
         transform: hidden ? "translateY(-100%)" : "translateY(0)",
-        transition: "transform 300ms ease, color 300ms ease, background 300ms ease, backdrop-filter 300ms ease",
+        transition: "transform 300ms ease, color 300ms ease",
         color: isOverHero ? "white" : "var(--foreground)",
-        backdropFilter: isOverHero || isAtTop ? "blur(0px)" : "blur(50px)",
-        WebkitBackdropFilter: isOverHero || isAtTop ? "blur(0px)" : "blur(50px)",
-        background: isOverHero || isAtTop ? "transparent" : "color-mix(in oklch, var(--background) 30%, transparent)",
+        background: "transparent",
       }}
     >
       {/* Mobile hamburger */}

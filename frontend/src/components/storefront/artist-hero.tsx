@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { FadeIn } from "@/components/landing/fade-in";
+import { MULTI_ITEM_DISCOUNT_RATE } from "@/lib/constants";
 import type { Artist, Product } from "@/lib/types";
 
 interface ArtistHeroProps {
@@ -192,6 +193,20 @@ export function ArtistHero({ artist, products, heroImageUrl }: ArtistHeroProps) 
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden">
+      {/* Promo banner — translucent, pinned near the top of the hero */}
+      <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex justify-center px-4 md:top-2">
+        <FadeIn delay={650}>
+          <div className="pointer-events-auto rounded-full border border-white/20 bg-white/10 px-6 py-2.5 text-center shadow-sm backdrop-blur-md transition-all duration-300 ease-out hover:scale-[1.03] hover:border-white/30 hover:bg-white/15">
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white md:text-[13px] md:tracking-[0.2em]">
+              {MULTI_ITEM_DISCOUNT_RATE * 100}% off
+              <span className="ml-1.5 font-medium text-white/70">
+                when you order 2 or more
+              </span>
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+
       {/* Background */}
       {heroImageUrl ? (
         <div className="absolute inset-0">
